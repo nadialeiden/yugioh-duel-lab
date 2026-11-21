@@ -17,12 +17,21 @@ Open **http://localhost:4173**. The terminal also prints your machine's LAN addr
 
 ## Modes
 
-- **Practice:** play against an AI opponent. Choose Exosister, Swordsoul Tenyi, or any legal saved deck for either side. Choose turn order and optional helpers. Review measured decisions, response opportunities, resources, and sequencing prompts.
+- **Practice:** play against an AI opponent. Choose one of the six included presets or any legal saved deck for either side. Choose turn order and optional helpers. Review measured decisions, response opportunities, resources, and sequencing prompts.
 - **Local duel:** two devices, two browsers, one room. On the local Node server, both devices open the **same printed LAN URL**, then one creates a room and the other enters its six-character code. Both decks are validated. The host goes first. Rooms expire when either player disconnects.
 - **Deck workshop:** search the verified AE pool, edit Main/Extra/Side, save multiple decks, import `.ydk`, `ydke://`, or names with quantities, and export `.ydk`. Optional event/source fields retain tournament-list provenance. An imported tournament list still has to pass AE validation.
 - **Learn the interface:** a separate six-lesson tour. Try inspecting a card, making a demonstration summon, exploring the phase display, and stepping through a Pax / Ash Blossom / Called by the Grave chain. The tour never changes an active duel or your decks.
 
-The two included decks are curated practice lists, **not tournament-winning recipes**. Saved decks stay in the current browser's local storage; export `.ydk` to back them up or move them between devices.
+The included decks are curated practice lists, **not tournament-winning recipes**. Saved decks stay in the current browser's local storage; export `.ydk` to back them up or move them between devices.
+
+| AI deck preset | Matchup focus |
+| --- | --- |
+| Exosister | Xyz control and graveyard response timing |
+| Swordsoul Tenyi | Synchro summons and disruption sequencing |
+| Rescue-ACE | FIRE control and back-row interaction |
+| Salamangreat | FIRE Link summons and graveyard recursion |
+| Blue-Eyes | Dragon Synchro/Fusion pressure and recovery |
+| Labrynth | Normal Trap control and resource management |
 
 ## Format snapshot
 
@@ -40,6 +49,7 @@ This is a dated snapshot. It does **not** update itself when Konami releases a n
 ```powershell
 npm test
 npm run test:engine
+npm run test:ai
 ```
 
 With `npm start` running, browser checks are available:
@@ -74,7 +84,7 @@ Practice, deck editing, and Learn run entirely in the browser. Hosted rooms use 
 - OCGCore and Project Ignis Lua scripts enforce card effects and legal actions. This fan project is not a Konami-certified simulator or ruling authority.
 - The AI is a **heuristic practice opponent**, not WindBot or an optimal-play solver. It can play multiple decks through engine-provided actions, but its deck-specific planning is limited. Complex/unusual selections may need a manual decision for the AI, explicitly identified in the UI.
 - Evaluations count choices and resources and offer conditional sequencing prompts. They do not grade a move as objectively optimal or calculate a win probability.
-- Initial effect-script loading is relatively large. Card illustrations and web fonts use external sources; the duel data and engine are bundled locally.
+- The phone effect bundle is about 5 MiB and loads when a duel starts. Card illustrations and web fonts use external sources; the duel data and engine are bundled locally.
 - Rooms have one host and one guest. There is no matchmaking, account system, ranked ladder, spectator mode, reconnect recovery, or best-of-three sideboarding flow.
 
 Read [ARCHITECTURE.md](ARCHITECTURE.md) for module boundaries, data preparation, room transport, rule enforcement, testing, and extension notes. See [THIRD_PARTY.md](THIRD_PARTY.md) and [LICENSE](LICENSE) for source and license information.

@@ -31,7 +31,7 @@ There is no database, authentication service, or paid AI API. Decks live in brow
 | `dist/style.css` | Custom dark teal duel mat, responsive table, cards, chains, reduced-motion styling |
 | `dist/app.mjs` | Mode state, decks, practice lifecycle, room messages, UI wiring |
 | `dist/model.mjs` | Deck parsing/export, AE validation, zone masks, hidden-information projection |
-| `dist/data.mjs` | Bundled data loading, card text, effect descriptions, script archive decoding |
+| `dist/data.mjs` | Bundled data loading, card text, effect descriptions, compressed Lua-source decoding |
 | `dist/engine.mjs` | WebAssembly initialization, seeded opening shuffle, engine stepping, queries, decisions, logs |
 | `dist/choices.mjs` | Convert engine decision messages into UI choices and typed engine responses |
 | `dist/bot.mjs` | AI action ranking and bounded material-selection search |
@@ -77,7 +77,7 @@ The refresh helpers are explicit maintainer commands, not an in-app promise of l
 
 ## AI opponent
 
-The AI uses the same decision interface as a person. It ranks legal summons, effect activations, sets, attacks, and chain responses; selected cards and materials come from the lists returned by the core. It includes useful priorities for Exosister and Swordsoul/Tenyi and a generic fallback for other saved decks. A bounded subset search considers alternate material values for sum-based prompts.
+The AI uses the same decision interface as a person. It ranks legal summons, effect activations, sets, attacks, and chain responses; selected cards and materials come from the lists returned by the core. It includes card priorities for the six curated presets: Exosister, Swordsoul/Tenyi, Rescue-ACE, Salamangreat, Blue-Eyes, and Labrynth, plus a generic fallback for other saved decks. A bounded subset search considers alternate material values for sum-based prompts. Repeated elective activations are capped by the heuristic to avoid unproductive legal loops.
 
 It is **not** a search tree, neural model, WindBot integration, or tournament-strength opponent. It does not evaluate every future chain or know an optimal combo line. Its legal-action filtering should not be confused with strategic quality. If a complex decision cannot be solved, practice pauses and visibly asks the person to choose for the AI. This assistance mechanism is practice-only.
 
@@ -121,7 +121,7 @@ Rooms, turn state, evaluations, and tutorial progress are not persisted across p
 
 Checks cover actual data-backed AE legality, combined limits, unverified identities, import/export, deterministic shuffle, hidden-state redaction, field-mask decoding, material sum selection, room membership/direction, a complete real-core Exosister-versus-Swordsoul duel, desktop/mobile browser rendering, the tutorial chain, and two-client LAN interaction. Browser screenshot artifacts stay outside version control.
 
-External artwork/font availability can affect presentation without changing the core rules or deck validation. Initial card-script loading is large and happens only when a duel starts. Browser refreshes disconnect rooms; no recovery is implemented.
+External artwork/font availability can affect presentation without changing the core rules or deck validation. The phone loader downloads `data/effects.bin`, a gzip-compressed JSON mapping of official Lua sources, root helpers, and pre-errata helpers (about 5 MiB). Combining sources before compression avoids the overhead of individually compressed small files. `data/scripts.zip` retains the original upstream source archive for attribution/reproduction and is not fetched by a playing browser. Both bundled engine fixtures use the same optimized effect bundle as the browser. Browser refreshes disconnect rooms; no recovery is implemented.
 
 ## Licenses and attribution
 

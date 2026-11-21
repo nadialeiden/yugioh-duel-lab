@@ -9,7 +9,7 @@ const cards=new Map(catalog.map(c=>[c.code,c]));
 const data=JSON.parse(fs.readFileSync(new URL('../dist/data/starters.json',import.meta.url),'utf8'));
 const rules=JSON.parse(fs.readFileSync(new URL('../dist/data/ae-rules.json',import.meta.url),'utf8'));
 const releases=new Map(Object.entries(data.releases).map(([id,r])=>[+id,r]));
-test('both bundled decks satisfy the actual AE pool and combined restriction list',()=>{
+test('all bundled decks satisfy the actual AE pool and combined restriction list',()=>{
   for(const deck of data.decks)assert.deepEqual(validateDeck(deck,cards,rules,releases),[]);
 });
 test('AE restrictions count main, extra, and side together using Konami identities',()=>{

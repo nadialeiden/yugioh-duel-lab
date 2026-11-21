@@ -9,6 +9,7 @@ const page=await context.newPage();const errors=[];
 page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR:',e.message);});
 page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('net::'))console.error('CONSOLE:',m.text());});
 await page.goto('http://localhost:4173');await page.waitForFunction(()=>!document.querySelector('#start-practice').disabled,{timeout:30000});
+if(await page.locator('#bot-deck option').count()!==6)throw new Error('All six AI presets must be available.');
 await page.screenshot({path:fileURLToPath(new URL('practice-setup.png',out)),fullPage:true});
 await page.getByRole('button',{name:'Deck workshop',exact:true}).click();await page.locator('#card-search').fill('Exosister');
 await page.waitForTimeout(300);console.log('Workshop:',await page.locator('#deck-legality').textContent(),await page.locator('#search-count').textContent());

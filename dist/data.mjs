@@ -1,4 +1,4 @@
-import { unzipSync, strFromU8 } from './vendor/fflate.mjs';
+import { gunzipSync, strFromU8 } from './vendor/fflate.mjs';
 
 export const cards = new Map();
 export const releases = new Map();
@@ -11,9 +11,9 @@ export async function loadCatalog(progress = () => {}) {
   catalogJob = (async () => {
     progress('Loading the card library…');
     const [list, listRules, starters] = await Promise.all([
-      fetch('./data/catalog.json').then(check).then(r => r.json()),
-      fetch('./data/ae-rules.json').then(check).then(r => r.json()),
-      fetch('./data/starters.json').then(check).then(r => r.json())
+      fetch('./data/catalog.json',{cache:'no-cache'}).then(check).then(r => r.json()),
+      fetch('./data/ae-rules.json',{cache:'no-cache'}).then(check).then(r => r.json()),
+      fetch('./data/starters.json',{cache:'no-cache'}).then(check).then(r => r.json())
     ]);
     list.forEach(c => cards.set(c.code, c)); rules = listRules;
     for (const [id, evidence] of Object.entries(starters.releases || {})) releases.set(+id, evidence);
@@ -31,12 +31,8 @@ export function loadScripts(progress = () => {}) {
   if (scriptJob) return scriptJob;
   scriptJob = (async () => {
     progress('Loading card effects…');
-    const buffer = await fetch('./data/scripts.zip').then(check).then(r => r.arrayBuffer());
-    const files = unzipSync(new Uint8Array(buffer), {filter: f => f.name.endsWith('.lua')});
-    scripts = new Map();
-    for (const [path, bytes] of Object.entries(files)) {
-      const name = path.split('/').slice(1).join('/'); scripts.set(name, strFromU8(bytes));
-    }
+    const buffer = await fetch('./data/effects.bin',{cache:'no-cache'}).then(check).then(r => r.arrayBuffer());
+    scripts = new Map(Object.entries(JSON.parse(strFromU8(gunzipSync(new Uint8Array(buffer))))));
     return scripts;
   })();
   return scriptJob.catch(e => { scriptJob = null; throw e; });

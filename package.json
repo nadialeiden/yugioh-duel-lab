@@ -10,6 +10,7 @@
     "build": "node scripts/build.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:engine": "node tests/engine-smoke.mjs",
+    "test:ai": "node tests/ai-decks.mjs",
     "test:browser": "node tests/browser-smoke.mjs",
     "test:local": "node tests/local-browser.mjs",
     "test:peer": "node tests/peer-browser.mjs",

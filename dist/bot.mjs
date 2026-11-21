@@ -5,6 +5,10 @@ const priorities = new Map([
   ['Exosister Kaspitell',95],['Exosister Mikailis',97],['Exosisters Magnifica',110],['Exosister Vadis',80],['Exosister Returnia',95],
   ['Swordsoul of Mo Ye',100],['Swordsoul of Taia',90],['Swordsoul Strategist Longyuan',95],['Swordsoul Emergence',100],
   ['Swordsoul Grandmaster - Chixiao',105],['Swordsoul Supreme Sovereign - Chengying',100],['Tenyi Spirit - Ashuna',90],['Tenyi Spirit - Vishuda',80],
+  ['Rescue-ACE Hydrant',110],['Rescue-ACE Air Lifter',100],['Rescue-ACE Quick Attacker',105],['Rescue-ACE Turbulence',110],['Rescue-ACE Preventer',95],['Rescue-ACE Arbitrator',120],['EMERGENCY!',112],
+  ['Salamangreat of Fire',110],['Salamangreat Gazelle',105],['Salamangreat Spinny',95],['Salamangreat Circle',110],['Cynet Mining',105],['Salamangreat Sunlight Wolf',105],['Salamangreat Raging Phoenix',115],['Salamangreat Miragestallio',108],
+  ['Sage with Eyes of Blue',105],['Maiden of White',110],['Wishes for Eyes of Blue',115],['Roar of the Blue-Eyed Dragons',110],['Spirit with Eyes of Blue',110],['Blue-Eyes Spirit Dragon',110],['Blue-Eyes Ultimate Spirit Dragon',125],['True Light',100],
+  ['Arianna the Labrynth Servant',110],['Arias the Labrynth Butler',100],['Lady Labrynth of the Silver Castle',105],['Lovely Labrynth of the Silver Castle',100],['Big Welcome Labrynth',115],['Welcome Labrynth',105],
   ['Ash Blossom & Joyous Spring',90],['Maxx "C"',100],['Infinite Impermanence',95],['Called by the Grave',100]
 ]);
 export function chooseBot(m,session,cardMap) {
@@ -16,12 +20,15 @@ export function chooseBot(m,session,cardMap) {
   const best=choices=>choices.reduce((a,b)=>b.score>a.score?b:a);
   const effectName=card(session.lastActivation?.code)?.name||'';
   if(m.type===11) {
+    const uses=session.botUses||(session.botUses=new Map());
+    const activationKey=choice=>state.turn+':'+m.player+':'+choice.card?.code+':'+choice.card?.location+':'+String(choice.card?.description||0);
     const scored=prompt.choices.map(choice=>{
       const r=choice.response, c=card(choice.card?.code); let value=-20;
       if(r.action===0)value=score(choice.card)+30;
       if(r.action===1)value=score(choice.card)+50;
       if(r.action===5) {
         value=score(choice.card)+60;
+        if((uses.get(activationKey(choice))||0)>=2)value=-100;
         if((c?.type&4)||(c?.type&65536))value=state.turnPlayer===me?-30:value;
         if(/Reborn|Vishuda|Raigeki|Lightning Storm/.test(c?.name||'')&&!enemyMonsters.length)value=-50;
         if(/Returnia|Mikailis/.test(c?.name||'')&&choice.card.location===4&&!enemyMonsters.length&&!enemy.grave.length)value=-40;
@@ -33,7 +40,7 @@ export function chooseBot(m,session,cardMap) {
       if(r.action===7)value=-10;
       return {choice,score:value};
     });
-    return best(scored).choice.response;
+    const choice=best(scored).choice;if(choice.response.action===5){const key=activationKey(choice);uses.set(key,(uses.get(key)||0)+1);}return choice.response;
   }
   if(m.type===10) {
     const attacks=prompt.choices.filter(c=>c.response.action===1).map(choice=>{

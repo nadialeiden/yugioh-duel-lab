@@ -1,12 +1,15 @@
 """Fetch and bundle the public Project Ignis engine data for browser-local duels."""
 import concurrent.futures
 import json
+import gzip
+import io
 import pathlib
 import shutil
 import sqlite3
 import tempfile
 import time
 import urllib.request
+import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parent
 OUT = ROOT / 'dist'
@@ -70,7 +73,9 @@ def main():
     except Exception as error:
         print('Optional card-ID enrichment unavailable:', type(error).__name__, flush=True)
     (DATA / 'catalog.json').write_text(json.dumps(list(cards.values()), ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
-    (DATA / 'scripts.zip').write_bytes(fetch('https://codeload.github.com/ProjectIgnis/CardScripts/zip/refs/heads/master'))
+    archive = fetch('https://codeload.github.com/ProjectIgnis/CardScripts/zip/refs/heads/master')
+    (DATA / 'scripts.zip').write_bytes(archive)
+    bundle_effects(archive)
     (DATA / 'strings.conf').write_bytes(fetch('https://raw.githubusercontent.com/ProjectIgnis/Distribution/master/config/strings.conf'))
     engine = ROOT / 'node_modules' / 'ocgcore-wasm' / 'dist'
     target = OUT / 'vendor' / 'ocg'
@@ -80,6 +85,20 @@ def main():
     shutil.copy2(ROOT / 'node_modules/fflate/esm/browser.js', OUT / 'vendor/fflate.mjs')
     (DATA / 'asset-info.json').write_text(json.dumps({'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'engine': 'ocgcore-wasm 0.1.7', 'cards': len(cards), 'sources': ['https://github.com/ProjectIgnis/BabelCDB', 'https://github.com/ProjectIgnis/CardScripts']}), encoding='utf-8')
     print('Browser engine and scripts ready.', flush=True)
+
+def bundle_effects(archive=None):
+    archive = archive or (DATA / 'scripts.zip').read_bytes()
+    scripts = {}
+    with zipfile.ZipFile(io.BytesIO(archive)) as source:
+        for entry in source.infolist():
+            name = '/'.join(entry.filename.split('/')[1:])
+            if not name.endswith('.lua'):
+                continue
+            if '/' not in name or name.split('/')[0] in ('official', 'pre-errata'):
+                scripts[name] = source.read(entry).decode('utf-8-sig')
+    payload = gzip.compress(json.dumps(scripts, ensure_ascii=False, separators=(',', ':')).encode('utf8'), compresslevel=9, mtime=0)
+    (DATA / 'effects.bin').write_bytes(payload)
+    print('Phone effect bundle:', len(scripts), 'Lua sources,', round(len(payload) / 1024 / 1024, 1), 'MiB', flush=True)
 
 if __name__ == '__main__':
     main()

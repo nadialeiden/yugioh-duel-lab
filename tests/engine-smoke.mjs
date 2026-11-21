@@ -1,13 +1,12 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
-import {unzipSync,strFromU8} from 'fflate';
+import {gunzipSync,strFromU8} from 'fflate';
 import {DuelSession} from '../dist/engine.mjs';
 import {chooseBot} from '../dist/bot.mjs';
 import {OcgCoreInternal} from '../dist/vendor/ocg/index.js';
 const cards=new Map(JSON.parse(fs.readFileSync(new URL('../dist/data/catalog.json',import.meta.url),'utf8')).map(c=>[c.code,c]));
 const decks=JSON.parse(fs.readFileSync(new URL('../dist/data/starters.json',import.meta.url),'utf8')).decks;
-const zip=unzipSync(fs.readFileSync(new URL('../dist/data/scripts.zip',import.meta.url)),{filter:f=>f.name.endsWith('.lua')});
-const scripts=new Map(Object.entries(zip).map(([p,b])=>[p.split('/').slice(1).join('/'),strFromU8(b)]));
+const scripts=new Map(Object.entries(JSON.parse(strFromU8(gunzipSync(fs.readFileSync(new URL('../dist/data/effects.bin',import.meta.url)))))));
 const errors=[];
 const session=new DuelSession({cards,readScript:name=>scripts.get(name)||scripts.get('official/'+name)||null,onError:e=>{errors.push(e);console.error(e.stack);},seed:[1n,2n,3n,4n]});
 await session.start(decks);
