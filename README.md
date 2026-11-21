@@ -24,6 +24,8 @@ Open **http://localhost:4173**. The terminal also prints your machine's LAN addr
 
 The included decks are curated practice lists, **not tournament-winning recipes**. Saved decks stay in the current browser's local storage; export `.ydk` to back them up or move them between devices.
 
+During a duel, the table shows each chain link with its card, activating player, and resolution/negation status. Animation pauses AI progression so the response is readable; Skip advances the presentation, and Details reopens the last resolved chain. On a phone, use **Show table / Open decisions** to switch between the board and the fixed bottom decision drawer. Tapping your card opens its text and legal action buttons. Timing help can be expanded when needed.
+
 | AI deck preset | Matchup focus |
 | --- | --- |
 | Exosister | Xyz control and graveyard response timing |
@@ -57,6 +59,9 @@ With `npm start` running, browser checks are available:
 ```powershell
 npm run test:browser
 npm run test:local
+npm run test:chains
+npm run test:local-chains
+npm run test:mobile
 ```
 
 The included Windows browser checks use installed Microsoft Edge. Set `BROWSER_PATH` to another Chromium executable if needed; on other platforms they can use Playwright Chromium after `npx playwright install chromium`. Browser tests save screenshots under ignored `qa/`.

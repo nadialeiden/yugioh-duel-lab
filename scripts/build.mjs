@@ -10,6 +10,6 @@ for(const [dependency,file] of [['fflate','LICENSE'],['peerjs','LICENSE'],['ws',
 const data=JSON.parse(await readFile(path.join(root,'dist/data/starters.json'),'utf8'));
 const rules=JSON.parse(await readFile(path.join(root,'dist/data/ae-rules.json'),'utf8'));
 if(!data.decks?.length||data.poolCount<1000||!rules.date)throw new Error('Verified AE data is missing. Run the documented preparation scripts.');
-for(const name of ['index.html','app.mjs','style.css','data/catalog.json','data/effects.bin','vendor/ocg/index.js'])await access(path.join(root,'dist',name));
+for(const name of ['index.html','app.mjs','style.css','duel-feedback.css','chain-events.mjs','chain-ui.mjs','data/catalog.json','data/effects.bin','vendor/ocg/index.js'])await access(path.join(root,'dist',name));
 await writeFile(path.join(root,'dist/build-info.json'),JSON.stringify({builtAt:new Date().toISOString(),commit:process.env.VERCEL_GIT_COMMIT_SHA||null,rules:rules.date,verified:rules.checkedAt}));
 console.log('Static app ready: '+data.poolCount+' verified AE identities; restriction list '+rules.date+'.');

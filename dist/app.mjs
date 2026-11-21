@@ -7,6 +7,7 @@ import {PracticeReview} from './evaluation.mjs';
 import {LocalRoom,revivePacket} from './network.mjs';
 import {configureDuelRenderer,renderBoard,renderDecision,renderLog,renderReview,inspectCard,openPile,handleChoice,confirmSelection,cancelSelection,changeCounter} from './duel-render.mjs';
 import {renderLearn,stopLearn} from './learn.mjs';
+import {chainPlayback} from './chain-ui.mjs';
 const STORE='ae-duel-lab.decks.v1';
 let mode='practice',loaded=false,library=[],editing=null,section='main',resultsLimit=24;
 let session=null,review=null,viewer=0,botPlayer=1,botTimer=null,takeover=false,ended=false,currentState=null,duelMode=null;
@@ -23,6 +24,8 @@ function refreshSelects(){
 }
 function setMode(next){
   mode=next;stopLearn();
+  document.body.dataset.mode=next;
+  document.body.classList.toggle('duel-visible',!!currentState&&duelMode===next);
   document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
   $('duel-screen').classList.toggle('hidden',!['practice','local'].includes(mode));$('deck-screen').classList.toggle('hidden',mode!=='decks');$('learn-screen').classList.toggle('hidden',mode!=='learn');
   $('mode-kicker').textContent=mode==='local'?'THE LOCAL TABLE':'THE PRACTICE ROOM';
@@ -36,22 +39,28 @@ function setMode(next){
   }
   history.replaceState(null,'','#'+mode);
 }
-function showRail(tab){for(const name of ['decision','log','evaluation']){$(name+'-panel').classList.toggle('hidden',name!==tab);$(name+'-tab').classList.toggle('active',name===tab);$(name+'-tab').setAttribute('aria-selected',String(name===tab));}}
+function setRailExpanded(expanded){document.querySelector('.right-rail').classList.toggle('is-collapsed',!expanded);$('mobile-panel-toggle').setAttribute('aria-expanded',String(expanded));$('mobile-panel-label').textContent=expanded?'Show table':'Open decisions';}
+function showRail(tab){setRailExpanded(true);for(const name of ['decision','log','evaluation']){$(name+'-panel').classList.toggle('hidden',name!==tab);$(name+'-tab').classList.toggle('active',name===tab);$(name+'-tab').setAttribute('aria-selected',String(name===tab));}}
 function present(state){
   currentState=state;
+  document.body.classList.toggle('duel-visible',duelMode===mode);
   renderBoard(state,viewer);renderLog(state);renderReview(review,state);
   renderDecision(takeover&&session?{...state,prompt:session.state.prompt}:state,viewer,{coach:duelMode==='practice'&&$('coach-toggle').checked,thinking:duelMode==='practice'&&session?.state.prompt?.player===botPlayer,ended,takeover});
+  $('decision-panel').inert=chainPlayback.busy;
+  if(state.prompt?.player===viewer&&state.promptId!==present.lastPrompt){present.lastPrompt=state.promptId;if(!chainPlayback.busy)showRail('decision');}
   $('surrender').disabled=ended||state.winner!==null;
 }
 function updateSession(state){
   clearTimeout(botTimer);
+  const activeSession=session;
+  const schedule=(callback,delay)=>chainPlayback.whenIdle().then(()=>{if(session===activeSession&&session.state.promptId===state.promptId&&!ended)botTimer=setTimeout(callback,delay);});
   present(session.view(viewer));
   if(roomRole==='host'&&duelMode==='local')room.send({type:'state',state:session.view(viewer^1),viewer:viewer^1,decks:session.decks.map(d=>({name:d.name})),ended});
   if(state.winner!==null){ended=true;if(duelMode==='practice')showRail('evaluation');return;}
-  if(state.prompt?.type===16&&!state.prompt.forced&&!state.prompt.selects.length){const id=state.promptId;botTimer=setTimeout(()=>{if(session?.state.promptId===id&&!ended)session.respond({type:8,index:null},id,state.prompt.player);},40);return;}
+  if(state.prompt?.type===16&&!state.prompt.forced&&!state.prompt.selects.length){const id=state.promptId;schedule(()=>{if(session?.state.promptId===id&&!ended)session.respond({type:8,index:null},id,state.prompt.player);},40);return;}
   if(duelMode==='practice'&&state.prompt?.player===botPlayer&&!takeover){
     const promptId=state.promptId;
-    botTimer=setTimeout(()=>{
+    schedule(()=>{
       if(!session||session.state.promptId!==promptId||ended||takeover)return;
       try{const response=chooseBot(session.state.prompt,session,cards);if(!response)throw new Error('No eligible response was found.');session.respond(response,promptId,botPlayer);}
       catch(error){pendingBotError=error;takeover=true;present(session.view(viewer));toast('The AI needs help with an unusual decision. Choose for it, then practice continues.');}
@@ -65,6 +74,7 @@ function sessionError(error){
 }
 function respond(response){
   if(!currentState||ended)return;
+  if(chainPlayback.busy)return;
   if(roomRole==='guest'&&duelMode==='local'){room.send({type:'response',response,promptId:currentState.promptId});$('decision-panel').innerHTML='<p class="muted">Sending your decision…</p>';return;}
   if(!session)return;
   const message=session.state.prompt;if(!message)return;
@@ -99,7 +109,7 @@ function confirmConcede(){
 function newDuel(){
   if(currentState&&!ended&&currentState.winner===null){confirmConcede();return;}
   clearTimeout(botTimer);session?.destroy();session=null;review=null;currentState=null;ended=false;duelMode=null;takeover=false;
-  room?.close();room=null;roomRole=null;guestDeck=null;renderBoard(null);renderLog(null);$('arena').classList.remove('live-duel');setMode(mode);
+  room?.close();room=null;roomRole=null;guestDeck=null;renderBoard(null);renderLog(null);document.body.classList.remove('duel-live','duel-visible');$('arena').classList.remove('live-duel');setMode(mode);
   $('decision-panel').innerHTML='<div class="waiting-icon">◇</div><h2>Ready for another?</h2><p class="muted">Choose your decks and take your seat.</p>';
 }
 async function ensureRoom(){
@@ -199,15 +209,16 @@ function showFormat(){
 function keyboardHelp(){modal('Keyboard shortcuts','<div class="kb-list"><p><kbd>1</kbd> Practice · <kbd>2</kbd> Local duel · <kbd>3</kbd> Deck workshop · <kbd>4</kbd> Learn</p><p><kbd>D</kbd> Decision · <kbd>L</kbd> Duel log · <kbd>R</kbd> Practice review</p><p><kbd>Esc</kbd> Close a dialog</p><p>All card actions remain available through the Decision panel. Keyboard shortcuts do not automatically activate cards or pass response windows.</p></div>');}
 document.addEventListener('click',event=>{
   const b=event.target.closest('button');if(!b)return;
+  if(b.dataset.chainCard){inspectCard(+b.dataset.chainCard,{popup:true});return;}
   if(b.dataset.mode){setMode(b.dataset.mode);return;}
   if(b.dataset.card!==undefined){
     const id=+b.dataset.card;if(!id){toast('That card is private.');return;}
     const player=+b.dataset.controller,location=+b.dataset.location,index=+b.dataset.sequence;
     const key={2:'hand',4:'monsters',8:'spells',16:'grave',32:'banished',64:'extra'}[location];
-    const instance=currentState?.players[player]?.[key]?.[index];inspectCard(id,{instance});return;
+    const instance=currentState?.players[player]?.[key]?.[index];inspectCard(id,{instance,controller:player,location,sequence:index,allowActions:true});return;
   }
   if(b.dataset.pile){openPile(+b.dataset.controller,+b.dataset.pile);return;}
-  if(b.dataset.choice!==undefined){handleChoice(+b.dataset.choice);return;}
+  if(b.dataset.choice!==undefined){if(chainPlayback.busy)return;closeModal();setRailExpanded(true);handleChoice(+b.dataset.choice);return;}
   if(b.dataset.declare){respond({type:18,card:+b.dataset.declare});return;}
   if(b.dataset.inspect){inspectCard(+b.dataset.inspect,{popup:mode==='decks'});return;}
   if(b.dataset.editDeck){editing=structuredClone(deckById(b.dataset.editDeck));renderWorkshop();return;}
@@ -229,6 +240,14 @@ document.addEventListener('keydown',event=>{if(event.ctrlKey||event.metaKey||eve
 $('close-modal').onclick=closeModal;$('modal').addEventListener('click',event=>{if(event.target===$('modal')){const r=$('modal').getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closeModal();}});
 $('start-practice').onclick=startPractice;$('surrender').onclick=confirmConcede;$('new-duel').onclick=newDuel;
 $('decision-tab').onclick=()=>showRail('decision');$('log-tab').onclick=()=>showRail('log');$('evaluation-tab').onclick=()=>showRail('evaluation');
+$('mobile-panel-toggle').onclick=()=>setRailExpanded(document.querySelector('.right-rail').classList.contains('is-collapsed'));
+window.addEventListener('chain-playback',event=>{
+  if(event.detail.busy){setRailExpanded(false);return;}
+  if(!currentState)return;
+  renderDecision(takeover&&session?{...currentState,prompt:session.state.prompt}:currentState,viewer,{coach:duelMode==='practice'&&$('coach-toggle').checked,thinking:duelMode==='practice'&&session?.state.prompt?.player===botPlayer,ended,takeover});
+  $('decision-panel').inert=false;
+  if(currentState.prompt?.player===viewer&&!ended)showRail('decision');
+});
 $('create-room').onclick=hostRoom;$('join-room').onclick=joinRoom;$('local-start').onclick=startLocal;
 $('leave-room').onclick=()=>{room?.close();room=null;roomRole=null;guestDeck=null;roomCode='';$('local-start').classList.add('hidden');$('leave-room').classList.add('hidden');setRoomStatus('You left the room.');};
 $('save-deck').onclick=saveDeck;$('export-deck').onclick=()=>download((editing.name||'deck').replace(/[^a-z0-9-]/gi,'_')+'.ydk',exportYdk(editing));

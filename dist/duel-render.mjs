@@ -2,6 +2,7 @@ import {$,escape,image,art,modal,typeName} from './ui.mjs';
 import {cards,cardName,effectText} from './data.mjs';
 import {describePrompt,selectionResponse,selectionValid} from './choices.mjs';
 import {coachHint} from './evaluation.mjs';
+import {chainPlayback} from './chain-ui.mjs';
 let onRespond,onInspect,selection=[],counterValues=[],currentPrompt,currentMessage,currentState,currentViewer=0;
 export function configureDuelRenderer({respond,inspect}){onRespond=respond;onInspect=inspect;}
 export function gameCard(c,controller,location,sequence,playable=false){
@@ -30,6 +31,7 @@ export function renderBoard(state,viewer=0){
   $('opponent-hand').innerHTML=players[enemy].hand.map(()=>'<div class="mini-back" aria-label="Opponent card"></div>').join('');
   $('own-hand').innerHTML=players[viewer].hand.map((c,i)=>gameCard(c,viewer,2,i,playable.has(viewer+':2:'+i))).join('');
   $('hand-count').textContent=players[viewer].hand.length;
+  document.querySelector('.hand-label span:last-child').textContent=players[viewer].hand.length>5?'SWIPE / SCROLL TO VIEW ALL CARDS':'SELECT A CARD TO INSPECT';
   $('extra-zones').innerHTML=[5,6].map((sequence,i)=>{
     const c=players[viewer].monsters[sequence]||players[enemy].monsters[i===0?6:5];
     const owner=players[viewer].monsters[sequence]?viewer:enemy,seq=owner===viewer?sequence:i===0?6:5;
@@ -39,13 +41,16 @@ export function renderBoard(state,viewer=0){
   $('phase-strip').innerHTML=[['Draw','DP'],['Standby','SP'],['Main 1','M1'],['Battle','BP'],['Main 2','M2'],['End','EP']].map(([name,label])=>`<span class="phase-pill${phase===name?' active':''}" title="${name}">${label}</span>`).join('');
   $('turn-marker').innerHTML='TURN <strong>'+(state?.turn||'—')+'</strong>';
   for(const [suffix,player]of [['you',viewer],['opponent',enemy]]){$('lp-'+suffix).textContent=Number(state?.lp?.[player]??8000).toLocaleString();$('lp-bar-'+suffix).style.width=Math.min(100,(state?.lp?.[player]??8000)/80)+'%';}
-  $('chain-overlay').innerHTML=(state?.chain||[]).map((c,index)=>`<div class="chain-link"><b>${index+1}</b><span>${escape(cardName(c.code))}</span></div>`).join('');
+  chainPlayback.update(state,viewer);
 }
-export function inspectCard(id,{popup=false,instance=null}={}){
+export function inspectCard(id,{popup=false,instance=null,controller,location,sequence,allowActions=false}={}){
   const c=cards.get(+id);if(!c)return;
   const content=`<h2>${escape(c.name)}</h2><div class="card-kind">${escape(typeName(c))}${c.level?' · '+(c.type&0x800000?'Rank':c.type&0x4000000?'Link':'Level')+' '+c.level:''}</div>${c.type&1?`<div class="card-stats"><span>ATK <b>${instance?.attack??c.attack}</b></span><span>${c.type&0x4000000?'LINK':'DEF'} <b>${c.type&0x4000000?c.level:instance?.defense??c.defense}</b></span></div>`:''}<p class="card-effect">${escape(c.text)}</p>${instance?.overlayCards?.length?`<p class="mini-label">Xyz materials: ${instance.overlayCards.map(cardName).map(escape).join(', ')}</p>`:''}${c.cid?`<a class="mini-label" href="https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&amp;cid=${c.cid}&amp;request_locale=ae" target="_blank" rel="noreferrer">Official AE card details</a>`:''}`;
   $('inspect-art').classList.remove('card-back');$('inspect-art').innerHTML=image(id);$('inspect-details').innerHTML=content;
-  if(popup||innerWidth<=1050)modal(c.name,`<div class="modal-card"><div>${image(id)}</div><div>${content}</div></div>`);
+  if(popup||innerWidth<=1050){
+    const available=allowActions&&currentState?.prompt?.player===currentViewer&&!chainPlayback.busy?describePrompt(currentState.prompt,cardName,effectText).choices.map((choice,index)=>({...choice,index})).filter(choice=>choice.response&&choice.card?.code===+id&&(controller===undefined||choice.card.controller===controller&&choice.card.location===location&&choice.card.sequence===sequence)):[];
+    modal(c.name,`<div class="modal-card"><div>${image(id)}</div><div>${content}</div></div>${available.length?`<div class="inspector-actions"><h3>Available actions</h3>${available.map(choice=>`<button class="action-choice" data-choice="${choice.index}"><span><strong>${escape(choice.label)}</strong><small>${escape(choice.detail)}</small></span></button>`).join('')}</div>`:''}`);
+  }
 }
 export function openPile(controller,location){
   const p=currentState?.players[controller];if(!p)return;
@@ -55,10 +60,12 @@ export function openPile(controller,location){
 }
 export function renderDecision(state,viewer,{coach=true,thinking=false,ended=false,takeover=false}={}){
   const panel=$('decision-panel'),m=state?.prompt;
+  document.body.classList.toggle('duel-live',!!state?.players?.length);
+  const mobileStatus=$('mobile-decision-status');if(mobileStatus)mobileStatus.textContent=chainPlayback.busy?'Watch the chain':m?.player===viewer?'Your decision':thinking?'AI opponent’s turn':'Waiting for opponent';
   if(ended||state?.winner!==null&&state?.winner!==undefined){panel.innerHTML=`<div class="waiting-icon">◇</div><h2>${state?.winner===viewer?'Your victory.':state?.winner===2?'A draw.':'A chance to learn.'}</h2><p class="muted">${ended?'The duel has ended.':'The result is recorded by the OCG engine.'}</p><button class="primary full" data-action="review">Open practice review</button>`;return;}
   if(!m||m.player!==viewer&&!takeover){panel.innerHTML=`<span class="tiny-label">${thinking?'AI OPPONENT':'LOCAL DUEL'}</span><div class="waiting-icon">◇</div><h2>${thinking?'Considering its next play…':'Waiting for your opponent.'}</h2><p class="muted">You will receive a decision when you have a legal play or response.</p>`;return;}
   currentMessage=m;currentPrompt=describePrompt(m,cardName,effectText);selection=[];counterValues=Array(m.cards?.length||0).fill(0);
-  panel.innerHTML=`${takeover?'<div class="status-banner">AI needs assistance with this decision. Your choice will be played for the opponent.</div>':''}<span class="tiny-label">${state.turnPlayer===viewer?'YOUR TURN':'RESPONSE WINDOW'}</span><h2 style="margin-top:.6rem">${escape(currentPrompt.title)}</h2>${coach?`<p class="tip-box">${escape(coachHint(m,state.phase,cardName))}</p>`:''}${currentPrompt.note?`<p class="muted">${escape(currentPrompt.note)}</p>`:''}${currentPrompt.multiple?`<div class="selection-count" id="selection-count">Select ${currentPrompt.min===currentPrompt.max?currentPrompt.min:currentPrompt.min+'–'+currentPrompt.max}</div>`:''}<div id="decision-choices">${currentPrompt.choices.map((choice,index)=>`<button class="action-choice" data-choice="${index}">${choice.card?.code?image(choice.card.code):''}<span><strong>${escape(choice.label)}</strong>${choice.card?.code&&choice.label!==cardName(choice.card.code)?`<small>${escape(cardName(choice.card.code))}</small>`:''}${choice.detail?`<small>${escape(choice.detail)}</small>`:''}</span></button>`).join('')}</div>${currentPrompt.counter?m.cards.map((c,i)=>`<label class="counter-control"><span>${escape(cardName(c.code))}</span><input type="number" data-counter="${i}" min="0" max="${c.count}" value="0"></label>`).join(''):''}${currentPrompt.announce?'<input id="declare-card" type="search" placeholder="Search a card to declare"><div id="declare-results"></div>':''}${currentPrompt.multiple||currentPrompt.counter?'<div class="selection-footer"><button id="confirm-selection" class="primary" disabled>Confirm selection</button>'+(currentPrompt.cancel?'<button id="cancel-selection" class="subtle">Cancel</button>':'')+'</div>':''}`;
+  panel.innerHTML=`${takeover?'<div class="status-banner">AI needs assistance with this decision. Your choice will be played for the opponent.</div>':''}<span class="tiny-label">${state.turnPlayer===viewer?'YOUR TURN':'RESPONSE WINDOW'}</span><h2 style="margin-top:.6rem">${escape(currentPrompt.title)}</h2>${coach?`<details class="prompt-help" ${innerWidth>780?'open':''}><summary>Timing help</summary><p>${escape(coachHint(m,state.phase,cardName))}</p></details>`:''}${currentPrompt.note?`<p class="muted">${escape(currentPrompt.note)}</p>`:''}${currentPrompt.multiple?`<div class="selection-count" id="selection-count">Select ${currentPrompt.min===currentPrompt.max?currentPrompt.min:currentPrompt.min+'–'+currentPrompt.max}</div>`:''}<div id="decision-choices">${currentPrompt.choices.map((choice,index)=>`<button class="action-choice" data-choice="${index}">${choice.card?.code?image(choice.card.code):''}<span><strong>${escape(choice.label)}</strong>${choice.card?.code&&choice.label!==cardName(choice.card.code)?`<small>${escape(cardName(choice.card.code))}</small>`:''}${choice.detail?`<small>${escape(choice.detail)}</small>`:''}</span></button>`).join('')}</div>${currentPrompt.counter?m.cards.map((c,i)=>`<label class="counter-control"><span>${escape(cardName(c.code))}</span><input type="number" data-counter="${i}" min="0" max="${c.count}" value="0"></label>`).join(''):''}${currentPrompt.announce?'<input id="declare-card" type="search" placeholder="Search a card to declare"><div id="declare-results"></div>':''}${currentPrompt.multiple||currentPrompt.counter?'<div class="selection-footer"><button id="confirm-selection" class="primary" disabled>Confirm selection</button>'+(currentPrompt.cancel?'<button id="cancel-selection" class="subtle">Cancel</button>':'')+'</div>':''}`;
   if(currentPrompt.announce)import('./vendor/ocg/index.js').then(({cardMatchesOpcode})=>{
     $('declare-card').oninput=()=>{const query=$('declare-card').value.toLowerCase();if(query.length<2){$('declare-results').innerHTML='';return;}
       const matches=[...cards.values()].filter(c=>c.name.toLowerCase().includes(query)&&cardMatchesOpcode({...c,race:BigInt(c.race)},m.opcodes)).slice(0,20);

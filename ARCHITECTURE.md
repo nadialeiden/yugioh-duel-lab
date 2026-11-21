@@ -37,6 +37,9 @@ There is no database, authentication service, or paid AI API. Decks live in brow
 | `dist/bot.mjs` | AI action ranking and bounded material-selection search |
 | `dist/duel-render.mjs` | Table, zones, hands, card inspection, decisions, logs, and review presentation |
 | `dist/evaluation.mjs` | Measured practice decisions and conditional coaching hints |
+| `dist/chain-events.mjs` | Public chain-event history and paced, deduplicated playback |
+| `dist/chain-ui.mjs` | Activating player, link cards, resolution/negation, and last-chain review |
+| `dist/duel-feedback.css` | Chain presentation, touch targets, and mobile decision drawer |
 | `dist/learn.mjs` | Isolated interface tour and deterministic chain demonstration |
 | `dist/network.mjs` | LAN WebSocket or hosted WebRTC connection and BigInt serialization |
 | `serve.mjs` | Static HTTP server, compressed responses, LAN address display, WebSocket upgrade |
@@ -89,6 +92,10 @@ To improve a deck, add an explicit strategy module with tests for opening hands,
 
 Helpers explain the current engine prompt: materials, targeting, zones, optional effects, and chain order. Empty optional response windows can be passed automatically because there is no legal effect to select. Windows with actual choices remain visible.
 
+Live chains use a bounded public journal rather than only the current `state.chain` array. A single OCGCore processing batch may emit activation, resolution, negation, and chain-end messages before the next player decision; reading only the final array would erase the visible chain. `recordChainEvent` captures independent link snapshots with monotonically increasing event IDs and a per-duel ID. Both player views receive these public events. `ChainPlayback` consumes each event once, including when repeated network snapshots arrive, and retains the final chain for review. It shows opponent/you labels, numbered cards, reverse resolution, and explicit negation status. AI actions and automatic empty-window passes wait for local presentation to settle. Skip affects playback, not effect results or core response legality.
+
+On phones, a fixed bottom drawer keeps decisions reachable without scrolling past the board. The drawer can collapse to reveal the table, automatically reopens for a player decision after playback, and uses its own scroll region with sticky selection confirmation. Tapping a card opens the inspector with legal single-action choices. Chain presentation sits above the board, independently of the drawer. Timing help is collapsed by default on narrow screens, text inputs avoid iOS zoom sizes, touch controls are enlarged, and safe-area padding keeps controls clear of the phone's home indicator. The interface tour still uses its own independent demonstration state.
+
 The interface tutorial is separate state. Its sample chain is a deterministic demonstration: Pax pays 800 LP, Ash is discarded to respond, Called by the Grave targets that Ash, and the chain resolves backward. Buttons can step, play, pause, or reset the sequence. This demonstration never submits a response to the live duel engine.
 
 ## Local and hosted room transport
@@ -119,7 +126,7 @@ Rooms, turn state, evaluations, and tutorial progress are not persisted across p
 
 `npm run build` verifies the prepared snapshot and engine assets, copies transport/license assets, and writes `build-info.json`. Vercel is configured to serve `dist/` statically. It requires no secrets, database, or serverless API for practice. A successful Git push triggers a connected Vercel project, but is not itself proof of a successful deployment.
 
-Checks cover actual data-backed AE legality, combined limits, unverified identities, import/export, deterministic shuffle, hidden-state redaction, field-mask decoding, material sum selection, room membership/direction, a complete real-core Exosister-versus-Swordsoul duel, desktop/mobile browser rendering, the tutorial chain, and two-client LAN interaction. Browser screenshot artifacts stay outside version control.
+Checks cover actual data-backed AE legality, combined limits, unverified identities, import/export, deterministic shuffle, hidden-state redaction, field-mask decoding, material sum selection, room membership/direction, a complete real-core Exosister-versus-Swordsoul duel, desktop/mobile browser rendering, the tutorial chain, and two-client LAN interaction. Chain regressions exercise a real Pax / AI Ash Blossom / Called by the Grave sequence on 390px and desktop viewports, plus host/guest Pax / Ash interactions on two phone-sized clients. Mobile layout fixtures at 320px, 390px, and 430px verify eight-card hand scrolling, card inspection, and a reachable decision drawer. These are browser/device emulation checks, not physical-phone certification. Browser screenshot artifacts stay outside version control.
 
 External artwork/font availability can affect presentation without changing the core rules or deck validation. The phone loader downloads `data/effects.bin`, a gzip-compressed JSON mapping of official Lua sources, root helpers, and pre-errata helpers (about 5 MiB). Combining sources before compression avoids the overhead of individually compressed small files. `data/scripts.zip` retains the original upstream source archive for attribution/reproduction and is not fetched by a playing browser. Both bundled engine fixtures use the same optimized effect bundle as the browser. Browser refreshes disconnect rooms; no recovery is implemented.
 
