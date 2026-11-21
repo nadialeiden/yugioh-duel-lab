@@ -1,0 +1,1542 @@
+[
+  {
+    "name": "Exosister Stella",
+    "konami_id": 16737,
+    "code": 43863925,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB03",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16737&request_locale=ae"
+  },
+  {
+    "name": "Exosister Elis",
+    "konami_id": 16736,
+    "code": 16474916,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB02",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16736&request_locale=ae"
+  },
+  {
+    "name": "Exosister Martha",
+    "konami_id": 17427,
+    "code": 37343995,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB01",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=17427&request_locale=ae"
+  },
+  {
+    "name": "Exosister Irene",
+    "konami_id": 16738,
+    "code": 79858629,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB04",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16738&request_locale=ae"
+  },
+  {
+    "name": "Exosister Sophia",
+    "konami_id": 16739,
+    "code": 5352328,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB05",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16739&request_locale=ae"
+  },
+  {
+    "name": "Sakitama",
+    "konami_id": 18490,
+    "code": 67972302,
+    "type": "Spirit Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB07",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "DBCB-AE050",
+        "date": "2025-03-15",
+        "product": "DECK-BUILD PACK CROSSOVER BREAKERS"
+      },
+      {
+        "code": "DBCB-AE050",
+        "date": "2025-03-15",
+        "product": "DECK-BUILD PACK CROSSOVER BREAKERS"
+      },
+      {
+        "code": "DBCB-AE050",
+        "date": "2025-03-15",
+        "product": "DECK-BUILD PACK CROSSOVER BREAKERS"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=18490&request_locale=ae"
+  },
+  {
+    "name": "Nibiru, the Primal Being",
+    "konami_id": 14741,
+    "code": 27204311,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "LAVD-AEL13",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AES16",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "CH01-AE017",
+        "date": "2025-10-25",
+        "product": "THE CHRONICLES DECK: THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "TT02-AEB08",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "RC04-AE016",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE016",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE016",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE016",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE016",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE016",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE016",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14741&request_locale=ae"
+  },
+  {
+    "name": "Aratama",
+    "konami_id": 10766,
+    "code": 16889337,
+    "type": "Spirit Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB06",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "DBCB-AE049",
+        "date": "2025-03-15",
+        "product": "DECK-BUILD PACK CROSSOVER BREAKERS"
+      },
+      {
+        "code": "DBCB-AE049",
+        "date": "2025-03-15",
+        "product": "DECK-BUILD PACK CROSSOVER BREAKERS"
+      },
+      {
+        "code": "DBCB-AE049",
+        "date": "2025-03-15",
+        "product": "DECK-BUILD PACK CROSSOVER BREAKERS"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=10766&request_locale=ae"
+  },
+  {
+    "name": "Dimension Shifter",
+    "konami_id": 14740,
+    "code": 91800273,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB09",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "RC04-AE015",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE015",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE015",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE015",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE015",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE015",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14740&request_locale=ae"
+  },
+  {
+    "name": "Ghost Ogre & Snow Rabbit",
+    "konami_id": 11708,
+    "code": 59438930,
+    "type": "Tuner Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB10",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "SDID-AEP03",
+        "date": "2023-11-11",
+        "product": "STRUCTURE DECK ILLUSION OF THE DARK MAGICIANS"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=11708&request_locale=ae"
+  },
+  {
+    "name": "Ash Blossom & Joyous Spring",
+    "konami_id": 12950,
+    "code": 14558127,
+    "type": "Tuner Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "LAVD-AEL12",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AEO17",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AES15",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "TT02-AEA09",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK RESCUE-ACE"
+      },
+      {
+        "code": "TT02-AEB11",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "DI01-AE014",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION HERO"
+      },
+      {
+        "code": "DI02-AE011",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      },
+      {
+        "code": "SDSS-AE022",
+        "date": "2024-05-18",
+        "product": "STRUCTURE DECK: SALAMANGREAT SANCTUM"
+      },
+      {
+        "code": "RC04-AE009",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE009",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE009",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE009",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE009",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE009",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE009",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=12950&request_locale=ae"
+  },
+  {
+    "name": "Maxx \"C\"",
+    "konami_id": 9455,
+    "code": 23434538,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "LAVD-AEL11",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AEO16",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AES13",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "TT02-AEA10",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK RESCUE-ACE"
+      },
+      {
+        "code": "TT02-AEB12",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "DI01-AE013",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION HERO"
+      },
+      {
+        "code": "DI02-AE010",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      },
+      {
+        "code": "RC04-AE005",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE005",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE005",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE005",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE005",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE005",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=9455&request_locale=ae"
+  },
+  {
+    "name": "Exosister Pax",
+    "konami_id": 16744,
+    "code": 77913594,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB13",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16744&request_locale=ae"
+  },
+  {
+    "name": "Triple Tactics Talent",
+    "konami_id": 15296,
+    "code": 25311006,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "LAVD-AEL24",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AES22",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "TT02-AEA20",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK RESCUE-ACE"
+      },
+      {
+        "code": "TT02-AEB16",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "RC04-AE064",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE064",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE064",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE064",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE064",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE064",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=15296&request_locale=ae"
+  },
+  {
+    "name": "Exosister Carpedivem",
+    "konami_id": 16746,
+    "code": 30802207,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB15",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16746&request_locale=ae"
+  },
+  {
+    "name": "Exosister Arment",
+    "konami_id": 16745,
+    "code": 4408198,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB14",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16745&request_locale=ae"
+  },
+  {
+    "name": "Called by the Grave",
+    "konami_id": 13619,
+    "code": 24224830,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "LAVD-AEL22",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AEO22",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AES21",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "TT02-AEA21",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK RESCUE-ACE"
+      },
+      {
+        "code": "TT02-AEB17",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "DI01-AE023",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION HERO"
+      },
+      {
+        "code": "DI02-AE017",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      },
+      {
+        "code": "RC04-AE058",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE058",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE058",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE058",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE058",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE058",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=13619&request_locale=ae"
+  },
+  {
+    "name": "Crossout Designator",
+    "konami_id": 14627,
+    "code": 65681983,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "LAVD-AEL23",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "TT02-AEB18",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "SDSS-AE035",
+        "date": "2024-05-18",
+        "product": "STRUCTURE DECK: SALAMANGREAT SANCTUM"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14627&request_locale=ae"
+  },
+  {
+    "name": "Exosister Vadis",
+    "konami_id": 16747,
+    "code": 77891946,
+    "type": "Trap Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB19",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16747&request_locale=ae"
+  },
+  {
+    "name": "Exosister Returnia",
+    "konami_id": 17478,
+    "code": 197042,
+    "type": "Trap Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB20",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=17478&request_locale=ae"
+  },
+  {
+    "name": "Solemn Judgment",
+    "konami_id": 4861,
+    "code": 41420027,
+    "type": "Trap Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "ES02-AE108",
+        "date": "2026-06-13",
+        "product": "ESSENTIAL SELECTION 02"
+      },
+      {
+        "code": "ES02-AE108",
+        "date": "2026-06-13",
+        "product": "ESSENTIAL SELECTION 02"
+      },
+      {
+        "code": "ES02-AE108",
+        "date": "2026-06-13",
+        "product": "ESSENTIAL SELECTION 02"
+      },
+      {
+        "code": "ES02-AE108",
+        "date": "2026-06-13",
+        "product": "ESSENTIAL SELECTION 02"
+      },
+      {
+        "code": "TT02-AEB21",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "SDID-AE039",
+        "date": "2023-11-11",
+        "product": "STRUCTURE DECK ILLUSION OF THE DARK MAGICIANS"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=4861&request_locale=ae"
+  },
+  {
+    "name": "Infinite Impermanence",
+    "konami_id": 13631,
+    "code": 10045474,
+    "type": "Trap Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEA26",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK RESCUE-ACE"
+      },
+      {
+        "code": "TT02-AEB22",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "DI01-AE026",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION HERO"
+      },
+      {
+        "code": "DI02-AE021",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      },
+      {
+        "code": "RC04-AE076",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE076",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE076",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE076",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE076",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE076",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=13631&request_locale=ae"
+  },
+  {
+    "name": "Exosister Mikailis",
+    "konami_id": 16740,
+    "code": 42741437,
+    "type": "XYZ Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB24",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16740&request_locale=ae"
+  },
+  {
+    "name": "Exosisters Magnifica",
+    "konami_id": 17157,
+    "code": 59242457,
+    "type": "XYZ Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB23",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "TT02-AEB23",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=17157&request_locale=ae"
+  },
+  {
+    "name": "Exosister Kaspitell",
+    "konami_id": 16741,
+    "code": 78135071,
+    "type": "XYZ Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB25",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16741&request_locale=ae"
+  },
+  {
+    "name": "Exosister Gibrine",
+    "konami_id": 16742,
+    "code": 5530780,
+    "type": "XYZ Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB26",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16742&request_locale=ae"
+  },
+  {
+    "name": "Divine Arsenal AA-ZEUS - Sky Thunder",
+    "konami_id": 15524,
+    "code": 90448279,
+    "type": "XYZ Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB28",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      },
+      {
+        "code": "ES01-AE039",
+        "date": "2024-07-13",
+        "product": "ESSENTIAL SELECTION 01"
+      },
+      {
+        "code": "ES01-AE039",
+        "date": "2024-07-13",
+        "product": "ESSENTIAL SELECTION 01"
+      },
+      {
+        "code": "ES01-AE039",
+        "date": "2024-07-13",
+        "product": "ESSENTIAL SELECTION 01"
+      },
+      {
+        "code": "ES01-AE039",
+        "date": "2024-07-13",
+        "product": "ESSENTIAL SELECTION 01"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=15524&request_locale=ae"
+  },
+  {
+    "name": "Exosister Asophiel",
+    "konami_id": 16743,
+    "code": 41524885,
+    "type": "XYZ Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TT02-AEB27",
+        "date": "2025-05-24",
+        "product": "TACTICAL-TRY DECK EXOSISTER"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16743&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul of Mo Ye",
+    "konami_id": 16489,
+    "code": 20001443,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE056",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE001",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16489&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul of Taia",
+    "konami_id": 16490,
+    "code": 56495147,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE055",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE002",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16490&request_locale=ae"
+  },
+  {
+    "name": "Incredible Ecclesia, the Virtuous",
+    "konami_id": 16493,
+    "code": 55273560,
+    "type": "Tuner Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE053",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "TFTV-AE053",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "TFTV-AES01",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "CH01-AE002",
+        "date": "2025-10-25",
+        "product": "THE CHRONICLES DECK: THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE004",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16493&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul Strategist Longyuan",
+    "konami_id": 16491,
+    "code": 93490856,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE057",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE003",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16491&request_locale=ae"
+  },
+  {
+    "name": "Tenyi Spirit - Adhara",
+    "konami_id": 14456,
+    "code": 98159737,
+    "type": "Tuner Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE005",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14456&request_locale=ae"
+  },
+  {
+    "name": "Tenyi Spirit - Vishuda",
+    "konami_id": 14460,
+    "code": 23431858,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE006",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14460&request_locale=ae"
+  },
+  {
+    "name": "Tenyi Spirit - Ashuna",
+    "konami_id": 14646,
+    "code": 87052196,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE007",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14646&request_locale=ae"
+  },
+  {
+    "name": "Tenyi Spirit - Shthana",
+    "konami_id": 14457,
+    "code": 24557335,
+    "type": "Effect Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE008",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14457&request_locale=ae"
+  },
+  {
+    "name": "Effect Veiler",
+    "konami_id": 8933,
+    "code": 97268402,
+    "type": "Tuner Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "LAVD-AEL10",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "LAVD-AES12",
+        "date": "2026-09-12",
+        "product": "LEGENDARY ARC-V DECKS"
+      },
+      {
+        "code": "25YC-AE002",
+        "date": "2025-12-20",
+        "product": "Yu-Gi-Oh! Championship Asia 2025 Prize Cards"
+      },
+      {
+        "code": "25YC-AE002",
+        "date": "2025-10-26",
+        "product": "Yu-Gi-Oh! Open Tournament 2025 Prize Cards"
+      },
+      {
+        "code": "DI02-AE009",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      },
+      {
+        "code": "RC04-AE003",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE003",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE003",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE003",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE003",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      },
+      {
+        "code": "RC04-AE003",
+        "date": "2024-01-20",
+        "product": "RARITY COLLECTION -QUARTER CENTURY EDITION-"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=8933&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul Emergence",
+    "konami_id": 16539,
+    "code": 56465981,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE060",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE012",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16539&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul Sacred Summit",
+    "konami_id": 16540,
+    "code": 93850690,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE061",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE013",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16540&request_locale=ae"
+  },
+  {
+    "name": "Flawless Perfection of the Tenyi",
+    "konami_id": 14503,
+    "code": 39730727,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE014",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14503&request_locale=ae"
+  },
+  {
+    "name": "Heavenly Dragon Circle",
+    "konami_id": 15300,
+    "code": 51684157,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE015",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=15300&request_locale=ae"
+  },
+  {
+    "name": "Vessel for the Dragon Cycle",
+    "konami_id": 14504,
+    "code": 65124425,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE016",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14504&request_locale=ae"
+  },
+  {
+    "name": "Raigeki",
+    "konami_id": 4343,
+    "code": 12580477,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE018",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      },
+      {
+        "code": "SDID-AEP16",
+        "date": "2023-11-11",
+        "product": "STRUCTURE DECK ILLUSION OF THE DARK MAGICIANS"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=4343&request_locale=ae"
+  },
+  {
+    "name": "Harpie's Feather Duster",
+    "konami_id": 4678,
+    "code": 18144507,
+    "type": "Spell Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE019",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      },
+      {
+        "code": "SDRB-AEP12",
+        "date": "2023-11-11",
+        "product": "STRUCTURE DECK RISE OF THE BLUE-EYES"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=4678&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul Blackout",
+    "konami_id": 16559,
+    "code": 14821890,
+    "type": "Trap Card",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE070",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE020",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16559&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul Supreme Sovereign - Chengying",
+    "konami_id": 16528,
+    "code": 96633955,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE058",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "TFTV-AE058",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE023",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16528&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul Grandmaster - Chixiao",
+    "konami_id": 16527,
+    "code": 69248256,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE059",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "TFTV-AE059",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE022",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16527&request_locale=ae"
+  },
+  {
+    "name": "Swordsoul Sinister Sovereign - Qixing Longyuan",
+    "konami_id": 16846,
+    "code": 47710198,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "TFTV-AE072",
+        "date": "2025-11-15",
+        "product": "THE FALLEN & THE VIRTUOUS"
+      },
+      {
+        "code": "DI02-AE024",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=16846&request_locale=ae"
+  },
+  {
+    "name": "Draco Berserker of the Tenyi",
+    "konami_id": 14662,
+    "code": 5041348,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE025",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14662&request_locale=ae"
+  },
+  {
+    "name": "Yazi, Evil of the Yang Zing",
+    "konami_id": 11383,
+    "code": 43202238,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE027",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=11383&request_locale=ae"
+  },
+  {
+    "name": "Baxia, Brightness of the Yang Zing",
+    "konami_id": 11260,
+    "code": 83755611,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE026",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=11260&request_locale=ae"
+  },
+  {
+    "name": "Adamancipator Risen - Dragite",
+    "konami_id": 15105,
+    "code": 9464441,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "CR13-AE060",
+        "date": "2026-10-10",
+        "product": "CREATION PACK 13"
+      },
+      {
+        "code": "CR13-AE060",
+        "date": "2026-10-10",
+        "product": "CREATION PACK 13"
+      },
+      {
+        "code": "CR13-AES25",
+        "date": "2026-10-10",
+        "product": "CREATION PACK 13 +1 BONUS PACK"
+      },
+      {
+        "code": "DI02-AE029",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=15105&request_locale=ae"
+  },
+  {
+    "name": "Chaofeng, Phantom of the Yang Zing",
+    "konami_id": 11722,
+    "code": 19048328,
+    "type": "Synchro Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE028",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=11722&request_locale=ae"
+  },
+  {
+    "name": "Monk of the Tenyi",
+    "konami_id": 14491,
+    "code": 32519092,
+    "type": "Link Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE030",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14491&request_locale=ae"
+  },
+  {
+    "name": "Shaman of the Tenyi",
+    "konami_id": 14492,
+    "code": 78917791,
+    "type": "Link Monster",
+    "released": true,
+    "checked": true,
+    "checked_at": "2026-11-22",
+    "printings": [
+      {
+        "code": "DI02-AE031",
+        "date": "2024-11-30",
+        "product": "DUEL-IGNITION SWORDSOUL"
+      }
+    ],
+    "source": "https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&cid=14492&request_locale=ae"
+  }
+]

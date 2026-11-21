@@ -1,0 +1,27 @@
+import {chromium} from 'playwright';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const out=new URL('../qa/',import.meta.url);fs.mkdirSync(out,{recursive:true});
+const browser=await chromium.launch({executablePath:process.env.BROWSER_PATH||(process.platform==='win32'?'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe':undefined),headless:true});
+const context=await browser.newContext({viewport:{width:1440,height:1040}});
+const page=await context.newPage();const errors=[];
+page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR:',e.message);});
+page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('net::'))console.error('CONSOLE:',m.text());});
+await page.goto('http://localhost:4173');await page.waitForFunction(()=>!document.querySelector('#start-practice').disabled,{timeout:30000});
+await page.screenshot({path:fileURLToPath(new URL('practice-setup.png',out)),fullPage:true});
+await page.getByRole('button',{name:'Deck workshop',exact:true}).click();await page.locator('#card-search').fill('Exosister');
+await page.waitForTimeout(300);console.log('Workshop:',await page.locator('#deck-legality').textContent(),await page.locator('#search-count').textContent());
+await page.screenshot({path:fileURLToPath(new URL('deck-workshop.png',out)),fullPage:true});
+await page.getByRole('button',{name:'Learn the interface',exact:true}).click();await page.locator('[data-lesson="4"]').click();
+for(let i=0;i<6;i++)await page.locator('#chain-next').click();console.log('Tutorial:',await page.locator('#chain-description').textContent());
+await page.screenshot({path:fileURLToPath(new URL('learn-chain.png',out)),fullPage:true});
+await page.getByRole('button',{name:'Practice',exact:true}).click();await page.locator('#start-practice').click();
+await page.waitForFunction(()=>document.querySelector('#setup-panel').classList.contains('hidden'),{timeout:30000});await page.waitForTimeout(3000);
+console.log('Duel:',await page.locator('#decision-panel').textContent());
+await page.screenshot({path:fileURLToPath(new URL('practice-live.png',out)),fullPage:true});
+const button=page.locator('.action-choice').filter({hasText:'Normal Summon'}).first();if(await button.count()){await button.click();await page.waitForTimeout(1000);console.log('After summon:',(await page.locator('#decision-panel').textContent()).slice(0,600));}
+await page.locator('#evaluation-tab').click();console.log('Review:',(await page.locator('#evaluation-panel').textContent()).slice(0,350));
+const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true});const mobilePage=await mobile.newPage();mobilePage.on('pageerror',e=>errors.push(e.message));await mobilePage.goto('http://localhost:4173');await mobilePage.waitForFunction(()=>!document.querySelector('#start-practice').disabled);await mobilePage.screenshot({path:fileURLToPath(new URL('mobile.png',out)),fullPage:true});
+console.log('Mobile horizontal overflow:',await mobilePage.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
+await browser.close();if(errors.length)throw new Error(errors.join('; '));console.log('Browser smoke passed.');

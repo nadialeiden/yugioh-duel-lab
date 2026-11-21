@@ -1,0 +1,15 @@
+node_modules/
+.openai/
+qa/
+artifacts/
+*.log
+workspace-check.txt
+.env
+.env.*
+!.env.example
+research/*.html
+research/__pycache__/
+__pycache__/
+.DS_Store
+dist/**/*.gz
+dist/build-info.json

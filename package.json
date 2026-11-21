@@ -1,0 +1,20 @@
+{
+  "name": "ae-duel-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-or-later",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "start": "node serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:engine": "node tests/engine-smoke.mjs",
+    "test:browser": "node tests/browser-smoke.mjs",
+    "test:local": "node tests/local-browser.mjs",
+    "test:peer": "node tests/peer-browser.mjs",
+    "refresh:data": "python research/refresh_ae_data.py && python prepare_assets.py && python bundle_research.py"
+  },
+  "dependencies": {"fflate": "0.8.3", "ocgcore-wasm": "0.1.7", "peerjs": "1.5.5", "ws": "8.21.0"},
+  "devDependencies": {"playwright": "1.58.2"}
+}
