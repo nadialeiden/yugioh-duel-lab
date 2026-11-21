@@ -26,6 +26,8 @@ The included decks are curated practice lists, **not tournament-winning recipes*
 
 During a duel, the table shows each chain link with its card, activating player, and resolution/negation status. Animation pauses AI progression so the response is readable; Skip advances the presentation, and Details reopens the last resolved chain. On a phone, use **Show table / Open decisions** to switch between the board and the fixed bottom decision drawer. Tapping your card opens its text and legal action buttons. Timing help can be expanded when needed.
 
+Card and zone selections remain editable until **Confirm selection**. In a single-choice picker, tap another candidate to replace the pending choice. Tap a selected candidate to deselect it, or use **Clear selection** to start over.
+
 | AI deck preset | Matchup focus |
 | --- | --- |
 | Exosister | Xyz control and graveyard response timing |

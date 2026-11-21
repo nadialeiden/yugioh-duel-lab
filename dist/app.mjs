@@ -5,7 +5,7 @@ import {DuelSession} from './engine.mjs';
 import {chooseBot} from './bot.mjs';
 import {PracticeReview} from './evaluation.mjs';
 import {LocalRoom,revivePacket} from './network.mjs';
-import {configureDuelRenderer,renderBoard,renderDecision,renderLog,renderReview,inspectCard,openPile,handleChoice,confirmSelection,cancelSelection,changeCounter} from './duel-render.mjs';
+import {configureDuelRenderer,renderBoard,renderDecision,renderLog,renderReview,inspectCard,openPile,handleChoice,confirmSelection,cancelSelection,clearSelection,changeCounter} from './duel-render.mjs';
 import {renderLearn,stopLearn} from './learn.mjs';
 import {chainPlayback} from './chain-ui.mjs';
 const STORE='ae-duel-lab.decks.v1';
@@ -233,7 +233,7 @@ document.addEventListener('click',event=>{
     case 'export-log':download('duel-log.txt',currentState?.log.map(l=>'Turn '+l.turn+' · '+l.text).join('\n')||'');break;
   }
   if(b.id==='tour-workshop'){closeModal();setMode('decks');}
-  if(b.id==='confirm-selection')confirmSelection();if(b.id==='cancel-selection')cancelSelection();
+  if(b.id==='confirm-selection')confirmSelection();if(b.id==='cancel-selection')cancelSelection();if(b.id==='clear-selection')clearSelection();
 });
 document.addEventListener('input',event=>{if(event.target.dataset.counter!==undefined)changeCounter(+event.target.dataset.counter,event.target.value);});
 document.addEventListener('keydown',event=>{if(event.ctrlKey||event.metaKey||event.altKey||event.target.closest('input,textarea,select')||$('modal').open)return;const key=event.key.toLowerCase();if('1234'.includes(key))setMode(['practice','local','decks','learn'][+key-1]);if(key==='d')showRail('decision');if(key==='l')showRail('log');if(key==='r')showRail('evaluation');});

@@ -66,6 +66,10 @@ export function renderDecision(state,viewer,{coach=true,thinking=false,ended=fal
   if(!m||m.player!==viewer&&!takeover){panel.innerHTML=`<span class="tiny-label">${thinking?'AI OPPONENT':'LOCAL DUEL'}</span><div class="waiting-icon">◇</div><h2>${thinking?'Considering its next play…':'Waiting for your opponent.'}</h2><p class="muted">You will receive a decision when you have a legal play or response.</p>`;return;}
   currentMessage=m;currentPrompt=describePrompt(m,cardName,effectText);selection=[];counterValues=Array(m.cards?.length||0).fill(0);
   panel.innerHTML=`${takeover?'<div class="status-banner">AI needs assistance with this decision. Your choice will be played for the opponent.</div>':''}<span class="tiny-label">${state.turnPlayer===viewer?'YOUR TURN':'RESPONSE WINDOW'}</span><h2 style="margin-top:.6rem">${escape(currentPrompt.title)}</h2>${coach?`<details class="prompt-help" ${innerWidth>780?'open':''}><summary>Timing help</summary><p>${escape(coachHint(m,state.phase,cardName))}</p></details>`:''}${currentPrompt.note?`<p class="muted">${escape(currentPrompt.note)}</p>`:''}${currentPrompt.multiple?`<div class="selection-count" id="selection-count">Select ${currentPrompt.min===currentPrompt.max?currentPrompt.min:currentPrompt.min+'–'+currentPrompt.max}</div>`:''}<div id="decision-choices">${currentPrompt.choices.map((choice,index)=>`<button class="action-choice" data-choice="${index}">${choice.card?.code?image(choice.card.code):''}<span><strong>${escape(choice.label)}</strong>${choice.card?.code&&choice.label!==cardName(choice.card.code)?`<small>${escape(cardName(choice.card.code))}</small>`:''}${choice.detail?`<small>${escape(choice.detail)}</small>`:''}</span></button>`).join('')}</div>${currentPrompt.counter?m.cards.map((c,i)=>`<label class="counter-control"><span>${escape(cardName(c.code))}</span><input type="number" data-counter="${i}" min="0" max="${c.count}" value="0"></label>`).join(''):''}${currentPrompt.announce?'<input id="declare-card" type="search" placeholder="Search a card to declare"><div id="declare-results"></div>':''}${currentPrompt.multiple||currentPrompt.counter?'<div class="selection-footer"><button id="confirm-selection" class="primary" disabled>Confirm selection</button>'+(currentPrompt.cancel?'<button id="cancel-selection" class="subtle">Cancel</button>':'')+'</div>':''}`;
+  if(currentPrompt.multiple){
+    const clear=document.createElement('button');clear.id='clear-selection';clear.className='subtle';clear.textContent='Clear selection';
+    $('confirm-selection').after(clear);$('selection-count').setAttribute('role','status');updateSelectionDisplay();
+  }
   if(currentPrompt.announce)import('./vendor/ocg/index.js').then(({cardMatchesOpcode})=>{
     $('declare-card').oninput=()=>{const query=$('declare-card').value.toLowerCase();if(query.length<2){$('declare-results').innerHTML='';return;}
       const matches=[...cards.values()].filter(c=>c.name.toLowerCase().includes(query)&&cardMatchesOpcode({...c,race:BigInt(c.race)},m.opcodes)).slice(0,20);
@@ -76,13 +80,21 @@ export function handleChoice(index){
   const p=currentPrompt,m=currentMessage,choice=p.choices[index];if(!choice)return;
   if(choice.card?.code&&innerWidth>1050)inspectCard(choice.card.code);
   if(p.multiple){
-    if(selection.includes(index))selection=selection.filter(i=>i!==index);else if(selection.length<p.max)selection.push(index);
-    document.querySelectorAll('[data-choice]').forEach(b=>b.classList.toggle('selected',selection.includes(+b.dataset.choice)));
-    $('selection-count').textContent=selection.length+' selected'+(p.ordered?' · order '+selection.map(i=>i+1).join(', '):'');
-    $('confirm-selection').disabled=!selectionValid(m,selection);return;
+    if(selection.includes(index))selection=selection.filter(i=>i!==index);
+    else if(p.max===1)selection=[index];
+    else if(selection.length<p.max)selection.push(index);
+    updateSelectionDisplay();return;
   }
   if(choice.response)onRespond(choice.response);
 }
+function updateSelectionDisplay(){
+  const p=currentPrompt;
+  document.querySelectorAll('#decision-choices [data-choice]').forEach(button=>{const selected=selection.includes(+button.dataset.choice);button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected));});
+  $('selection-count').textContent=selection.length+' / '+p.max+' selected'+(p.ordered?' · order '+selection.map(i=>i+1).join(', '):p.max===1&&selection.length?' · '+p.choices[selection[0]].label:selection.length===p.max?' · Tap a selected choice to remove it':'');
+  $('confirm-selection').disabled=!selectionValid(currentMessage,selection);
+  $('clear-selection').disabled=selection.length===0;
+}
+export function clearSelection(){if(!currentPrompt?.multiple)return;selection=[];updateSelectionDisplay();}
 export function confirmSelection(){if(currentPrompt.counter){if(counterValues.reduce((a,b)=>a+b,0)!==currentMessage.count)return;}else if(!selectionValid(currentMessage,selection))return;onRespond(selectionResponse(currentMessage,currentPrompt,selection,counterValues));}
 export function changeCounter(index,value){const maximum=currentMessage.cards[index].count;counterValues[index]=Math.min(maximum,Math.max(0,Math.floor(+value||0)));$('confirm-selection').disabled=counterValues.reduce((a,b)=>a+b,0)!==currentMessage.count;}
 export function cancelSelection(){if(currentPrompt.cancel)onRespond(currentPrompt.cancel);}

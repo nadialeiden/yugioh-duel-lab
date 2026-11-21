@@ -96,6 +96,8 @@ Live chains use a bounded public journal rather than only the current `state.cha
 
 On phones, a fixed bottom drawer keeps decisions reachable without scrolling past the board. The drawer can collapse to reveal the table, automatically reopens for a player decision after playback, and uses its own scroll region with sticky selection confirmation. Tapping a card opens the inspector with legal single-action choices. Chain presentation sits above the board, independently of the drawer. Timing help is collapsed by default on narrow screens, text inputs avoid iOS zoom sizes, touch controls are enlarged, and safe-area padding keeps controls clear of the phone's home indicator. The interface tour still uses its own independent demonstration state.
 
+Selection prompts keep pending choices in renderer state until explicit confirmation. Single-choice pickers replace the old choice when another candidate is tapped; selected candidates can be toggled off, and Clear selection resets a group. Selected state is exposed with `aria-pressed` and a live selection summary. These UI edits do not send an engine response; only confirmation submits the final indices or zones. The browser selection regression covers Mikailis-to-Kaspitell replacement, deselection, clearing/reselection, multi-card sets, and zone replacement at mobile and desktop widths.
+
 The interface tutorial is separate state. Its sample chain is a deterministic demonstration: Pax pays 800 LP, Ash is discarded to respond, Called by the Grave targets that Ash, and the chain resolves backward. Buttons can step, play, pause, or reset the sequence. This demonstration never submits a response to the live duel engine.
 
 ## Local and hosted room transport
