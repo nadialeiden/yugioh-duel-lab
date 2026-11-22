@@ -1,4 +1,25 @@
 .mobile-panel-toggle { display:none; }
+.decision-option { display:flex;gap:7px;align-items:stretch;margin-bottom:8px; }
+.decision-option .action-choice { flex:1;min-width:0;margin-bottom:0; }
+.read-choice { flex-shrink:0;width:74px;min-height:44px;background:#263b42;border:1px solid #57727d;color:#ccebe5;padding:8px;font-size:.8rem; }
+.read-choice:hover { background:#34545b; }
+.deck-preview-button { display:block;min-height:36px;margin:4px 0 0;text-align:left; }
+.setup-inner { max-height:100%;overflow-y:auto; }
+.preview-deck-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;margin:12px 0 24px; }
+.preview-deck-card { padding:8px;background:#202e3d;border:1px solid #3f5266;text-align:left; }
+.preview-deck-card img { width:100%;max-height:145px;object-fit:contain;display:block; }
+.preview-deck-card span { display:block;font-size:.8rem;line-height:1.4;margin-top:7px; }
+.preview-deck-card small { display:block;color:var(--accent);margin-top:3px; }
+#room-title[data-turn-owner="you"] { color:var(--accent); }
+#room-title[data-turn-owner="opponent"] { color:var(--purple); }
+.turn-owner-label { display:block;font-size:.75rem;letter-spacing:0;line-height:1.3;text-align:right;color:var(--text); }
+.turn-marker strong { font-size:1.1rem;margin-top:3px; }
+@media(max-width:780px) {
+  .read-choice { width:66px;min-height:48px;font-size:.8rem; }
+  .deck-preview-button { min-height:44px; }
+  .turn-owner-label { font-size:.65rem; }
+  body.duel-visible .duel-heading #room-title { font-size:1.12rem; }
+}
 .chain-overlay {
   display:none;
   inset:auto 12px 190px;

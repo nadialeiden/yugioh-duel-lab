@@ -12,6 +12,15 @@ export function gameCard(c,controller,location,sequence,playable=false){
 }
 function zone(c,label,controller,location,sequence,playable){return `<div class="zone" data-label="${label}">${gameCard(c,controller,location,sequence,playable)}</div>`;}
 function pile(label,count,controller,location,deck=false){return `<button class="pile${deck?' deck-pile':''}" data-pile="${location}" data-controller="${controller}" ${location===1?'disabled':''} aria-label="${label}, ${count} cards"><span>${label}</span><b>${count}</b></button>`;}
+export function renderTurnStatus(state,viewer=0){
+  const title=$('room-title'),marker=$('turn-marker');
+  if(!state?.players?.length){title.removeAttribute('data-turn-owner');return;}
+  const finished=state.winner!==null&&state.winner!==undefined;
+  const owner=finished?'Duel finished':state.turnPlayer===viewer?'Your turn':'Opponent’s turn';
+  if(title.textContent!==owner)title.textContent=owner;title.dataset.turnOwner=finished?'finished':state.turnPlayer===viewer?'you':'opponent';
+  title.setAttribute('role','status');title.setAttribute('aria-live','polite');
+  marker.innerHTML=`<span class="turn-owner-label">${owner}</span><strong>Turn ${state.turn||'—'}</strong>`;
+}
 export function renderBoard(state,viewer=0){
   currentState=state;currentViewer=viewer;
   const enemy=viewer^1;
@@ -39,7 +48,7 @@ export function renderBoard(state,viewer=0){
   }).join('');
   const phase=state?.phase||'Preparing';
   $('phase-strip').innerHTML=[['Draw','DP'],['Standby','SP'],['Main 1','M1'],['Battle','BP'],['Main 2','M2'],['End','EP']].map(([name,label])=>`<span class="phase-pill${phase===name?' active':''}" title="${name}">${label}</span>`).join('');
-  $('turn-marker').innerHTML='TURN <strong>'+(state?.turn||'—')+'</strong>';
+  renderTurnStatus(state,viewer);if(!state)$('turn-marker').innerHTML='TURN <strong>—</strong>';
   for(const [suffix,player]of [['you',viewer],['opponent',enemy]]){$('lp-'+suffix).textContent=Number(state?.lp?.[player]??8000).toLocaleString();$('lp-bar-'+suffix).style.width=Math.min(100,(state?.lp?.[player]??8000)/80)+'%';}
   chainPlayback.update(state,viewer);
 }
@@ -61,7 +70,7 @@ export function openPile(controller,location){
 export function renderDecision(state,viewer,{coach=true,thinking=false,ended=false,takeover=false}={}){
   const panel=$('decision-panel'),m=state?.prompt;
   document.body.classList.toggle('duel-live',!!state?.players?.length);
-  const mobileStatus=$('mobile-decision-status');if(mobileStatus)mobileStatus.textContent=chainPlayback.busy?'Watch the chain':m?.player===viewer?'Your decision':thinking?'AI opponent’s turn':'Waiting for opponent';
+  const mobileStatus=$('mobile-decision-status');if(mobileStatus)mobileStatus.textContent=(state.winner!==null&&state.winner!==undefined?'Duel finished':state.turnPlayer===viewer?'Your turn':'Opponent’s turn')+(chainPlayback.busy?' · Chain':m?.player===viewer?' · Choose':'');
   if(ended||state?.winner!==null&&state?.winner!==undefined){panel.innerHTML=`<div class="waiting-icon">◇</div><h2>${state?.winner===viewer?'Your victory.':state?.winner===2?'A draw.':'A chance to learn.'}</h2><p class="muted">${ended?'The duel has ended.':'The result is recorded by the OCG engine.'}</p><button class="primary full" data-action="review">Open practice review</button>`;return;}
   if(!m||m.player!==viewer&&!takeover){panel.innerHTML=`<span class="tiny-label">${thinking?'AI OPPONENT':'LOCAL DUEL'}</span><div class="waiting-icon">◇</div><h2>${thinking?'Considering its next play…':'Waiting for your opponent.'}</h2><p class="muted">You will receive a decision when you have a legal play or response.</p>`;return;}
   currentMessage=m;currentPrompt=describePrompt(m,cardName,effectText);selection=[];counterValues=Array(m.cards?.length||0).fill(0);
@@ -70,12 +79,19 @@ export function renderDecision(state,viewer,{coach=true,thinking=false,ended=fal
     const clear=document.createElement('button');clear.id='clear-selection';clear.className='subtle';clear.textContent='Clear selection';
     $('confirm-selection').after(clear);$('selection-count').setAttribute('role','status');updateSelectionDisplay();
   }
+  document.querySelectorAll('#decision-choices [data-choice]').forEach(button=>{
+    const index=+button.dataset.choice,choice=currentPrompt.choices[index];
+    if(!choice.card?.code||!cards.has(choice.card.code))return;
+    const row=document.createElement('div');row.className='decision-option';button.before(row);row.append(button);
+    const read=document.createElement('button');read.className='read-choice';read.dataset.readChoice=String(index);read.textContent='Read card';read.setAttribute('aria-label','Read '+cardName(choice.card.code));row.append(read);
+  });
   if(currentPrompt.announce)import('./vendor/ocg/index.js').then(({cardMatchesOpcode})=>{
     $('declare-card').oninput=()=>{const query=$('declare-card').value.toLowerCase();if(query.length<2){$('declare-results').innerHTML='';return;}
       const matches=[...cards.values()].filter(c=>c.name.toLowerCase().includes(query)&&cardMatchesOpcode({...c,race:BigInt(c.race)},m.opcodes)).slice(0,20);
       $('declare-results').innerHTML=matches.map(c=>`<button class="action-choice" data-declare="${c.code}">${escape(c.name)}</button>`).join('');};
   });
 }
+export function previewChoice(index){const code=currentPrompt?.choices[index]?.card?.code;if(code&&cards.has(code))inspectCard(code,{popup:true});}
 export function handleChoice(index){
   const p=currentPrompt,m=currentMessage,choice=p.choices[index];if(!choice)return;
   if(choice.card?.code&&innerWidth>1050)inspectCard(choice.card.code);

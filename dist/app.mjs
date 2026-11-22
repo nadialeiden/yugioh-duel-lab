@@ -5,13 +5,14 @@ import {DuelSession} from './engine.mjs';
 import {chooseBot} from './bot.mjs';
 import {PracticeReview} from './evaluation.mjs';
 import {LocalRoom,revivePacket} from './network.mjs';
-import {configureDuelRenderer,renderBoard,renderDecision,renderLog,renderReview,inspectCard,openPile,handleChoice,confirmSelection,cancelSelection,clearSelection,changeCounter} from './duel-render.mjs';
+import {configureDuelRenderer,renderBoard,renderTurnStatus,renderDecision,renderLog,renderReview,inspectCard,previewChoice,openPile,handleChoice,confirmSelection,cancelSelection,clearSelection,changeCounter} from './duel-render.mjs';
 import {renderLearn,stopLearn} from './learn.mjs';
 import {chainPlayback} from './chain-ui.mjs';
 const STORE='ae-duel-lab.decks.v1';
 let mode='practice',loaded=false,library=[],editing=null,section='main',resultsLimit=24;
 let session=null,review=null,viewer=0,botPlayer=1,botTimer=null,takeover=false,ended=false,currentState=null,duelMode=null;
 let room=null,roomRole=null,guestDeck=null,roomCode='',pendingBotError=null,starting=false;
+let previewedDeck=null;
 const storage={get(){try{return JSON.parse(localStorage.getItem(STORE)||'[]').filter(d=>d&&typeof d.name==='string'&&SECTIONS.every(s=>Array.isArray(d[s])&&d[s].length<=60&&d[s].every(n=>Number.isInteger(n))));}catch{return[];}},set(){try{localStorage.setItem(STORE,JSON.stringify(library));return true;}catch{toast('This browser could not save your decks. Export .ydk to keep a copy.');return false;}}};
 function busy(message){$('load-status').classList.remove('hidden');$('load-status').textContent=message;}
 function idle(){$('load-status').classList.add('hidden');}
@@ -30,6 +31,8 @@ function setMode(next){
   $('duel-screen').classList.toggle('hidden',!['practice','local'].includes(mode));$('deck-screen').classList.toggle('hidden',mode!=='decks');$('learn-screen').classList.toggle('hidden',mode!=='learn');
   $('mode-kicker').textContent=mode==='local'?'THE LOCAL TABLE':'THE PRACTICE ROOM';
   $('room-title').textContent=mode==='local'?'A familiar table. A real opponent.':'A little sharper, every duel.';
+  $('room-title').removeAttribute('data-turn-owner');
+  if(currentState&&duelMode===next)renderTurnStatus(currentState,viewer);
   $('setup-panel').classList.toggle('hidden',mode!=='practice'||!!session||roomRole==='guest'&&duelMode==='local');
   $('local-panel').classList.toggle('hidden',mode!=='local'||duelMode==='local'&&!!currentState);
   if(mode==='learn'&&loaded)renderLearn();if(mode==='decks'&&loaded)renderWorkshop();
@@ -203,12 +206,20 @@ function importDialog(){
     }catch(error){$('import-status').textContent=error.message;}
   };
 }
+function previewDeck(deck){
+  if(!deck)return;previewedDeck=deck;
+  modal(deck.name,`<p>Read any card before starting your duel. This preview does not change the selected deck.</p>${SECTIONS.map(section=>{const counts=new Map();for(const id of deck[section])counts.set(id,(counts.get(id)||0)+1);return `<h3>${section[0].toUpperCase()+section.slice(1)} Deck · ${deck[section].length}</h3><div class="preview-deck-grid">${[...counts].map(([id,count])=>`<button class="preview-deck-card" data-preview-card="${id}" aria-label="Read ${escape(cardName(id))}">${image(id)}<span>${escape(cardName(id))}<small>×${count}</small></span></button>`).join('')}</div>`;}).join('')}`);
+}
 function showFormat(){
   modal('Your format and data',`<p><strong>OCG Master Rule (April 2020 revision)</strong>, with OCG trigger handling from the EDOPro core. The application uses the Asian-English card pool and its separate Forbidden & Limited List.</p><ul class="source-list"><li>Restriction list effective <strong>${escape(rules?.date||'Unavailable')}</strong>.</li><li>Pool checked <strong>${escape(rules?.checkedAt||'Unavailable')}</strong>.</li><li><a href="https://www.yugioh-card.com/asia/play/forbidden-and-limited-card-list-ae/" target="_blank" rel="noreferrer">Konami AE Forbidden & Limited List</a></li><li><a href="https://www.db.yugioh-card.com/yugiohdb/?request_locale=ae" target="_blank" rel="noreferrer">Official English (Asia) card database</a></li><li><a href="https://github.com/n1xx1/ocgcore-wasm" target="_blank" rel="noreferrer">ocgcore-wasm 0.1.7 / EDOPro core</a></li></ul><p>The date shown is a verified snapshot. Run the documented refresh command when Konami publishes new releases or restrictions. Card artwork is from the international card database; eligibility is checked against official AE identities.</p><p>The AI is a heuristic practice opponent. It follows engine-provided legal actions, but its strategy is not a competitive solver. Unusual decisions can require assistance. Practice evaluations are measured indicators and coaching prompts.</p>`);
 }
 function keyboardHelp(){modal('Keyboard shortcuts','<div class="kb-list"><p><kbd>1</kbd> Practice · <kbd>2</kbd> Local duel · <kbd>3</kbd> Deck workshop · <kbd>4</kbd> Learn</p><p><kbd>D</kbd> Decision · <kbd>L</kbd> Duel log · <kbd>R</kbd> Practice review</p><p><kbd>Esc</kbd> Close a dialog</p><p>All card actions remain available through the Decision panel. Keyboard shortcuts do not automatically activate cards or pass response windows.</p></div>');}
 document.addEventListener('click',event=>{
   const b=event.target.closest('button');if(!b)return;
+  if(b.dataset.readChoice!==undefined){previewChoice(+b.dataset.readChoice);return;}
+  if(b.dataset.previewDeck){previewDeck(selectedDeck(b.dataset.previewDeck));return;}
+  if(b.dataset.previewCard){inspectCard(+b.dataset.previewCard,{popup:true});$('modal-body').insertAdjacentHTML('beforeend','<button id="back-deck-preview" class="subtle full" style="margin-top:16px">Back to deck</button>');return;}
+  if(b.id==='back-deck-preview'){previewDeck(previewedDeck);return;}
   if(b.dataset.chainCard){inspectCard(+b.dataset.chainCard,{popup:true});return;}
   if(b.dataset.mode){setMode(b.dataset.mode);return;}
   if(b.dataset.card!==undefined){
@@ -254,6 +265,7 @@ $('save-deck').onclick=saveDeck;$('export-deck').onclick=()=>download((editing.n
 $('create-deck').onclick=()=>{editing=emptyDeck('My new deck');section='main';renderWorkshop();};$('import-deck').onclick=importDialog;
 for(const id of ['card-search','type-filter','legal-filter'])$(id).addEventListener(id==='card-search'?'input':'change',()=>{resultsLimit=24;searchCards();});
 $('more-results').onclick=()=>{resultsLimit+=24;searchCards();};$('format-button').onclick=showFormat;$('keyboard-help').onclick=keyboardHelp;
+for(const control of ['practice-deck','bot-deck','local-deck']){const button=document.createElement('button');button.className='text-button deck-preview-button';button.dataset.previewDeck=control;button.textContent='View deck cards';$(control).after(button);}
 renderBoard(null);setMode(['practice','local','decks','learn'].includes(location.hash.slice(1))?location.hash.slice(1):'practice');
 try{
   const data=await loadCatalog(busy);library=storage.get();if(!library.length)library=structuredClone(data.decks);

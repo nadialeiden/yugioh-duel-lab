@@ -98,6 +98,8 @@ On phones, a fixed bottom drawer keeps decisions reachable without scrolling pas
 
 Selection prompts keep pending choices in renderer state until explicit confirmation. Single-choice pickers replace the old choice when another candidate is tapped; selected candidates can be toggled off, and Clear selection resets a group. Selected state is exposed with `aria-pressed` and a live selection summary. These UI edits do not send an engine response; only confirmation submits the final indices or zones. The browser selection regression covers Mikailis-to-Kaspitell replacement, deselection, clearing/reselection, multi-card sets, and zone replacement at mobile and desktop widths.
 
+Turn ownership is rendered from `turnPlayer === viewer`, independently of whose response is requested. It appears in the heading, turn marker, and mobile drawer so a response during the opponent's turn does not misidentify the active player. Candidate rows include an independent Read card button, which opens the inspector without selecting or submitting anything. Setup deck selectors use a read-only Main/Extra/Side preview. The turn/preview browser regression verifies both player perspectives, unchanged pending selections, and no engine responses from inspection.
+
 The interface tutorial is separate state. Its sample chain is a deterministic demonstration: Pax pays 800 LP, Ash is discarded to respond, Called by the Grave targets that Ash, and the chain resolves backward. Buttons can step, play, pause, or reset the sequence. This demonstration never submits a response to the live duel engine.
 
 ## Local and hosted room transport

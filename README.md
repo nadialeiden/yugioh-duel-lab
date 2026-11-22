@@ -28,6 +28,8 @@ During a duel, the table shows each chain link with its card, activating player,
 
 Card and zone selections remain editable until **Confirm selection**. In a single-choice picker, tap another candidate to replace the pending choice. Tap a selected candidate to deselect it, or use **Clear selection** to start over.
 
+The heading, turn marker, and mobile drawer identify **Your turn / Opponent’s turn** from your perspective, including response windows during the other player's turn. Use **Read card** next to a candidate or chain response to inspect its full text without changing the pending choice or activating it. Pre-duel deck selectors also have **View deck cards** previews, with a Back to deck button after inspecting a card.
+
 | AI deck preset | Matchup focus |
 | --- | --- |
 | Exosister | Xyz control and graveyard response timing |

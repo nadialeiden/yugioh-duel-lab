@@ -16,6 +16,7 @@
     "test:chains": "node tests/chain-browser.mjs",
     "test:mobile": "node tests/mobile-layout.mjs",
     "test:selection": "node tests/selection-browser.mjs",
+    "test:turn-preview": "node tests/turn-preview-browser.mjs",
     "test:local-chains": "node tests/chain-local-browser.mjs",
     "test:peer": "node tests/peer-browser.mjs",
     "refresh:data": "python research/refresh_ae_data.py && python prepare_assets.py && python bundle_research.py"
