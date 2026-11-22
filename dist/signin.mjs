@@ -1,5 +1,7 @@
 const form = document.querySelector('#demo-login');
-const signIn = form.querySelector('button');
+const signIn = form.querySelector('button[type="submit"]');
+const password = document.querySelector('#login-password');
+const passwordToggle = document.querySelector('#password-toggle');
 const guest = document.querySelector('#guest-entry');
 const error = document.querySelector('#entry-error');
 const hash = ['#practice', '#local', '#decks', '#learn'].includes(location.hash) ? location.hash : '';
@@ -20,7 +22,9 @@ async function submit(payload, button) {
     });
     const data = await response.json();
     if (response.ok) return enter(data.id);
-    error.textContent = data.error || 'Could not open the table. Try again.';
+    error.textContent = response.status === 401 && button === signIn
+      ? 'Login ID or password is incorrect. Use Show password to check capitalization and symbols.'
+      : data.error || 'Could not open the table. Try again.';
   } catch {
     error.textContent = 'Could not reach the lab. Try again.';
   }
@@ -33,6 +37,14 @@ form.addEventListener('submit', event => {
   submit(Object.fromEntries(new FormData(form)), signIn);
 });
 guest.addEventListener('click', () => submit({guest: true}, guest));
+
+passwordToggle.hidden = false;
+passwordToggle.addEventListener('click', () => {
+  const show = password.type === 'password';
+  password.type = show ? 'text' : 'password';
+  passwordToggle.textContent = show ? 'Hide' : 'Show';
+  passwordToggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+});
 
 if (new URLSearchParams(location.search).has('expired')) {
   error.textContent = 'Your session ended. Sign in to continue.';

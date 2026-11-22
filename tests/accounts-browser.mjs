@@ -43,8 +43,15 @@ try {
 
   await login('duelist1', 'wrong-password');
   await page.getByRole('alert').filter({hasText: 'Login ID or password is incorrect.'}).waitFor();
-  await page.locator('#login-password').fill('DuelLab-101!');
-  await page.locator('#demo-login button[type="submit"]').click();
+  const password = page.locator('#login-password');
+  await password.clear();
+  await password.pressSequentially('DuelLab-101!');
+  await page.getByRole('button', {name: 'Show password'}).click();
+  assert.equal(await password.getAttribute('type'), 'text');
+  assert.equal(await password.inputValue(), 'DuelLab-101!');
+  await page.getByRole('button', {name: 'Hide password'}).click();
+  assert.equal(await password.getAttribute('type'), 'password');
+  await password.press('Enter');
   await accountName('Duelist One').waitFor();
   assert.equal(new URL(page.url()).hash, '#decks');
   const authCookie = (await page.context().cookies()).find(cookie => cookie.name === 'duel_session');
@@ -55,7 +62,7 @@ try {
   await page.getByRole('button', {name: 'Save name', exact: true}).click();
   await accountName('Martha Practice').waitFor();
   await buildDeck('Account One Deck');
-  await page.reload();
+  await page.reload({waitUntil: 'domcontentloaded'});
   await accountName('Martha Practice').waitFor();
   await deckList.getByRole('button', {name: /Account One Deck/}).waitFor();
   await logout();
@@ -95,6 +102,27 @@ try {
   await page.getByRole('alert').filter({hasText: 'This browser has used its guest pass for today.'}).waitFor();
   assert.deepEqual(errors, []);
   console.log('Mobile entry, three accounts, profile isolation, reduced motion, and browser guest limit passed.');
+
+  const desktop = await browser.newPage({viewport: {width: 1440, height: 900}});
+  await desktop.goto(base + '/#learn');
+  for (const width of [680, 1024, 1440]) {
+    await desktop.setViewportSize({width, height: 900});
+    const gap = await desktop.evaluate(() => {
+      document.getAnimations().forEach(animation => animation.finish());
+      const copyTop = document.querySelector('.welcome').getBoundingClientRect().top;
+      const cardsBottom = Math.max(...[...document.querySelectorAll('.duel-card')].map(card => card.getBoundingClientRect().bottom));
+      return copyTop - cardsBottom;
+    });
+    assert.ok(gap >= 20, `Expected at least 20px between the cards and copy at ${width}px, got ${gap}`);
+  }
+  await desktop.locator('#login-id').pressSequentially('duelist2');
+  const desktopPassword = desktop.locator('#login-password');
+  await desktop.getByRole('button', {name: 'Show password'}).click();
+  await desktopPassword.pressSequentially('DuelLab-102!');
+  await desktopPassword.press('Enter');
+  await desktop.getByRole('button', {name: 'Account settings for Duelist Two'}).waitFor();
+  assert.equal(new URL(desktop.url()).hash, '#learn');
+  console.log('Typed password sign-in passed in masked and revealed fields. Desktop card spacing passed at 680px, 1024px, and 1440px.');
 } finally {
   await browser.close();
 }
