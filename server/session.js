@@ -37,13 +37,18 @@ export function createSessionCodec(secret, now = Date.now) {
     const digest = await crypto.subtle.sign('HMAC', await key, encoder.encode('ip:' + ip));
     return base64url(new Uint8Array(digest));
   }
-  async function session(header, ip) {
+  async function browserSession(header) {
     const value = await read(cookie(header, sessionCookie), 'session');
     if (!value) return null;
     if (accounts.has(value.id)) return value;
-    if (value.id !== 'guest' || !ip || value.ip !== await ipKey(ip)) return null;
+    if (value.id !== 'guest') return null;
     const device = await read(cookie(header, deviceCookie), 'device');
     return device?.id === value.device ? value : null;
   }
-  return {sign, read, ipKey, session};
+  async function session(header, ip) {
+    const value = await browserSession(header);
+    if (value?.id === 'guest' && (!ip || value.ip !== await ipKey(ip))) return null;
+    return value;
+  }
+  return {sign, read, ipKey, browserSession, session};
 }
