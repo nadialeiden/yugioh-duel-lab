@@ -1,3 +1,4 @@
+import {enterLab} from './browser-entry.mjs';
 import {chromium} from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,7 +9,7 @@ const context=await browser.newContext({viewport:{width:1440,height:1040}});
 const page=await context.newPage();const errors=[];
 page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR:',e.message);});
 page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('net::'))console.error('CONSOLE:',m.text());});
-await page.goto('http://localhost:4173');await page.waitForFunction(()=>!document.querySelector('#start-practice').disabled,{timeout:30000});
+await enterLab(page);await page.waitForFunction(()=>!document.querySelector('#start-practice').disabled,{timeout:30000});
 if(await page.locator('#bot-deck option').count()!==6)throw new Error('All six AI presets must be available.');
 await page.screenshot({path:fileURLToPath(new URL('practice-setup.png',out)),fullPage:true});
 await page.getByRole('button',{name:'Deck workshop',exact:true}).click();await page.locator('#card-search').fill('Exosister');
@@ -23,6 +24,6 @@ console.log('Duel:',await page.locator('#decision-panel').textContent());
 await page.screenshot({path:fileURLToPath(new URL('practice-live.png',out)),fullPage:true});
 const button=page.locator('.action-choice').filter({hasText:'Normal Summon'}).first();if(await button.count()){await button.click();await page.waitForTimeout(1000);console.log('After summon:',(await page.locator('#decision-panel').textContent()).slice(0,600));}
 await page.locator('#evaluation-tab').click();console.log('Review:',(await page.locator('#evaluation-panel').textContent()).slice(0,350));
-const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true});const mobilePage=await mobile.newPage();mobilePage.on('pageerror',e=>errors.push(e.message));await mobilePage.goto('http://localhost:4173');await mobilePage.waitForFunction(()=>!document.querySelector('#start-practice').disabled);await mobilePage.screenshot({path:fileURLToPath(new URL('mobile.png',out)),fullPage:true});
+const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true});const mobilePage=await mobile.newPage();mobilePage.on('pageerror',e=>errors.push(e.message));await enterLab(mobilePage);await mobilePage.waitForFunction(()=>!document.querySelector('#start-practice').disabled);await mobilePage.screenshot({path:fileURLToPath(new URL('mobile.png',out)),fullPage:true});
 console.log('Mobile horizontal overflow:',await mobilePage.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
 await browser.close();if(errors.length)throw new Error(errors.join('; '));console.log('Browser smoke passed.');

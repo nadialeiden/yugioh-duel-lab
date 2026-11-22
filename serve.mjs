@@ -6,14 +6,20 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {WebSocketServer} from 'ws';
 import {createRoomBroker} from './server-rooms.mjs';
-import login from './api/demo-login.js';
+import {createSessionCodec, publicPath, sessionPath, signInPath} from './server/session.js';
+import {createLoginHandler, clientIp} from './server/login.js';
 const root=path.resolve(fileURLToPath(new URL('./dist/',import.meta.url)));
+const codec=createSessionCodec(process.env.DUEL_SESSION_SECRET || crypto.randomBytes(32).toString('hex'));
+const login=createLoginHandler(codec);
 const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.zip':'application/zip','.wasm':'application/wasm','.svg':'image/svg+xml','.conf':'text/plain; charset=utf-8'};
 const port=Number(process.env.PORT||4173);
 const server=http.createServer(async(req,res)=>{
   try {
     const url=new URL(req.url,'http://localhost');
-    if(url.pathname==='/api/demo-login')return await login(req,res);
+    if(url.pathname===sessionPath)return await login(req,res);
+    if(!publicPath(url.pathname)&&!await codec.session(req.headers.cookie,clientIp(req,false))){
+      res.writeHead(303,{Location:signInPath,'Cache-Control':'no-store'});return res.end();
+    }
     if(url.pathname==='/api/info')return json(res,{lan:true,port});
     if(url.pathname==='/api/ae-card')return json(res,{error:'This card has no verified AE entry in the bundled pool. Refresh the AE data before using it.'},422);
     let filename=path.resolve(root,'.'+decodeURIComponent(url.pathname==='/'?'/index.html':url.pathname));
@@ -28,10 +34,12 @@ const server=http.createServer(async(req,res)=>{
 function json(res,data,status=200){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));}
 const wss=new WebSocketServer({noServer:true,maxPayload:512*1024});
 const broker=createRoomBroker();
-server.on('upgrade',(req,socket,head)=>{
+server.on('upgrade',async(req,socket,head)=>{
   try {
     const origin=new URL(req.headers.origin);
     if(origin.host!==req.headers.host||new URL(req.url,origin).pathname!=='/room')throw new Error();
+    const session=await codec.session(req.headers.cookie,clientIp(req,false));
+    if(!session||session.id==='guest')throw new Error();
     wss.handleUpgrade(req,socket,head,ws=>{broker.connect(ws);});
   }catch{socket.destroy();}
 });

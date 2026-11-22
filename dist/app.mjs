@@ -9,9 +9,17 @@ import {LocalRoom,revivePacket} from './network.mjs';
 import {configureDuelRenderer,renderBoard,renderTurnStatus,renderDecision,renderLog,renderReview,inspectCard,previewChoice,openPile,handleChoice,confirmSelection,cancelSelection,clearSelection,changeCounter} from './duel-render.mjs';
 import {renderLearn,stopLearn} from './learn.mjs';
 import {chainPlayback} from './chain-ui.mjs';
-import {activeAccount, readProfile, saveProfileDeck, setActiveAccount} from './profiles.mjs';
+import {readSession, readProfile, saveProfileDeck} from './profiles.mjs';
 import {showAccount} from './account-ui.mjs';
-let accountId = activeAccount(), starterDecks = [];
+const entry = await readSession().catch(() => null);
+if (!entry) {
+  location.replace('/signin.html' + location.hash);
+  // Hold initialization until the browser leaves this document.
+  await new Promise(() => {});
+}
+const {id: accountId, expires} = entry;
+const guestAccess = accountId === 'guest';
+let starterDecks = [];
 $('deck-screen').inert = true;
 let mode='practice',loaded=false,library=[],editing=null,section='main',resultsLimit=24;
 let session=null,review=null,viewer=0,botPlayer=1,botTimer=null,takeover=false,ended=false,currentState=null,duelMode=null;
@@ -24,29 +32,31 @@ function loadDeckLibrary() {
 function renderAccountName() {
   const name = readProfile(accountId).name;
   const button = $('account-button');
-  button.textContent = accountId ? name : 'Sign in';
-  button.setAttribute('aria-label', accountId ? `Account settings for ${name}` : 'Sign in');
-  $('duelist-label').textContent = accountId ? name : 'DUELIST';
-  $('deck-library-label').textContent = accountId ? `${name}’s decks` : 'Saved decks';
+  button.textContent = guestAccess ? `Guest · ${Math.max(0, Math.ceil((expires - Date.now()) / 60000))}m` : name;
+  button.setAttribute('aria-label', guestAccess ? 'Guest pass' : `Account settings for ${name}`);
+  $('duelist-label').textContent = name;
+  $('deck-library-label').textContent = `${name}’s decks`;
 }
 function canSwitchAccount() {
   if (starting || roomRole || (currentState && !ended && currentState.winner == null)) {
     throw new Error('Finish your duel or leave your room before switching accounts.');
   }
 }
-function switchAccount(nextId) {
-  canSwitchAccount();
-  setActiveAccount(nextId);
-  accountId = nextId;
-  if (currentState || session || room) newDuel();
-  editing = null;
-  section = 'main';
-  previewedDeck = null;
-  for (const control of ['practice-deck', 'bot-deck', 'local-deck']) $(control).value = '';
-  loadDeckLibrary();
-  renderAccountName();
-  refreshSelects();
-  if (mode === 'decks') renderWorkshop();
+function endAccess() { location.replace('/signin.html?expired=1' + location.hash); }
+async function recheckAccess() {
+  if (Date.now() >= expires) return endAccess();
+  try {
+    const current = await readSession();
+    if (!current) return endAccess();
+    if (current.id !== accountId || current.expires !== expires) location.reload();
+  } catch { /* The local duel can continue during a temporary network outage. */ }
+}
+setTimeout(endAccess, Math.max(0, expires - Date.now()));
+window.addEventListener('pageshow', event => { if (event.persisted) recheckAccess(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) recheckAccess(); });
+if (guestAccess) {
+  for (const button of document.querySelectorAll('nav [data-mode="local"], nav [data-mode="decks"]')) button.hidden = true;
+  setInterval(() => { renderAccountName(); recheckAccess(); }, 60000);
 }
 function busy(message){$('load-status').classList.remove('hidden');$('load-status').textContent=message;}
 function idle(){$('load-status').classList.add('hidden');}
@@ -58,6 +68,10 @@ function refreshSelects(){
   for(const id of ['practice-deck','bot-deck','local-deck']){const select=$(id),value=select.value;select.innerHTML=library.map(d=>`<option value="${escape(d.id)}">${escape(d.name)}${issues(d).length?' · needs revision':''}</option>`).join('');if(library.some(d=>d.id===value))select.value=value;else select.value=id==='bot-deck'?(starterDecks[1]?.id||library[0]?.id):library[0]?.id;}
 }
 function setMode(next){
+  if (guestAccess && !['practice','learn'].includes(next)) {
+    if (loaded) { toast('Sign in to use Local Duel or Deck Workshop.'); return; }
+    next = 'practice';
+  }
   mode=next;stopLearn();
   document.body.dataset.mode=next;
   document.body.classList.toggle('duel-visible',!!currentState&&duelMode===next);
@@ -242,7 +256,7 @@ function saveDeck(){
   loadDeckLibrary();
   refreshSelects();
   renderWorkshop();
-  toast(accountId ? 'Deck saved to ' + readProfile(accountId).name + '’s library.' : 'Deck saved in this browser.');
+  toast('Deck saved to ' + readProfile(accountId).name + '’s library.');
 }
 function importDialog(){
   modal('Import a deck',`<p>Upload a .ydk, paste a ydke:// link, or use card names with quantities. Include Main / Extra / Side section headings for text lists.</p><input class="file-input" id="deck-file" type="file" accept=".ydk,.txt"><textarea id="import-text" class="import-area" aria-label="Deck list" placeholder="#main&#10;3 Exosister Martha&#10;3 Exosister Elis&#10;#extra&#10;3 Exosister Mikailis&#10;!side"></textarea><div class="import-meta"><input id="import-title" placeholder="Deck / event name" aria-label="Deck or event name"><input id="import-source" placeholder="Tournament source URL (optional)" aria-label="Tournament source URL"></div><p id="import-status" role="status"></p><div class="modal-actions"><button class="subtle" data-action="close-modal">Cancel</button><button id="confirm-import" class="primary">Import into workshop</button></div>`);
@@ -326,7 +340,7 @@ try{
   loadDeckLibrary();
   renderAccountName();
   $('account-button').disabled=false;
-  $('account-button').onclick=()=>showAccount({id:accountId,switchAccount,canSwitch:canSwitchAccount,refreshName:renderAccountName});
+  $('account-button').onclick=()=>showAccount({id:accountId,expires,canSwitch:canSwitchAccount,refreshName:renderAccountName});
   loaded=true;refreshSelects();$('start-practice').disabled=false;$('format-date').textContent=rules.date.slice(5).replace('-',' / ');
   $('deck-screen').inert = false;
   $('data-footer').textContent=data.poolCount.toLocaleString()+' AE identities · verified '+data.poolCheckedAt;

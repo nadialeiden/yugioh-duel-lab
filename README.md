@@ -24,7 +24,9 @@ Open **http://localhost:4173**. The terminal also prints your machine's LAN addr
 
 The included decks are curated practice lists, **not tournament-winning recipes**. Saved decks stay in the current browser's local storage; export `.ydk` to back them up or move them between devices.
 
-Click **Sign in** and expand **Demo login details** to see the three shared demo credentials. Each account gets its own saved decks. Click your name in the header to change your display name or sign out. Use the original login ID to sign back in. Guest decks stay in their original library, and account data is saved per browser and site address.
+Enter through the sign-in screen using one of the three shared demo accounts. Each account gets its own saved decks. Click your name in the header to change your display name or sign out. Use the original login ID to sign back in. Account data is saved per browser and site address.
+
+**Continue as guest** opens Practice and Learn with the built-in decks for 30 minutes. Each browser gets one pass per UTC day, and each IP address gets up to three. Use an account to save decks or open Local Duel.
 
 During a duel, the table shows each chain link with its card, activating player, and resolution/negation status. Animation pauses AI progression so the response is readable; Skip advances the presentation, and Details reopens the last resolved chain. On a phone, use **Show table / Open decisions** to switch between the board and the fixed bottom decision drawer. Tapping your card opens its text and legal action buttons. Timing help can be expanded when needed.
 
@@ -87,7 +89,9 @@ The refresh refuses incomplete AE pagination or future restriction lists. If new
 
 ## Hosting
 
-`vercel.json` serves the app from `dist/` with `npm run build` as its build command. Vercel runs `api/demo-login.js` for the demo password check. The connected GitHub project deploys pushes to `main`.
+`npm run build -- --vercel` packages the static app, entry middleware, and login function for Vercel. The connected GitHub project deploys pushes to `main`. Set `DUEL_SESSION_SECRET` to a private random value to retain sessions across deployments and restarts. The three demo passwords can be set in `DUELIST1_PASSWORD`, `DUELIST2_PASSWORD`, and `DUELIST3_PASSWORD`.
+
+Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` (or `KV_REST_API_URL` and `KV_REST_API_TOKEN`) to share guest counts across function instances and restarts. Without Redis, the LAN server tracks the daily IP quota in its process and Vercel tracks it per running function instance.
 
 Practice, deck editing, and Learn run entirely in the browser. Hosted rooms use a PeerJS WebRTC connection with public signaling. That path needs internet access for signaling and a network that permits WebRTC; no TURN relay is configured, so direct connectivity across restrictive networks is not guaranteed. Same-Wi-Fi use is the intended hosted room scenario. The local Node/WebSocket path needs no external signaling and is the primary LAN path.
 

@@ -1,3 +1,4 @@
+import {enterLab} from './browser-entry.mjs';
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.BROWSER_PATH||(process.platform==='win32'?'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe':undefined),headless:true});
@@ -5,7 +6,7 @@ try{
   for(const width of [390,1440]){
     const page=await browser.newPage({viewport:{width,height:900},isMobile:width<780});const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
-    await page.goto(process.env.BASE_URL||'http://localhost:4173');await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);
+    await enterLab(page);await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);
     const selected=await page.locator('#practice-deck').inputValue();
     await page.locator('[data-preview-deck="practice-deck"]').click();
     await page.locator('[data-preview-card]').first().click();

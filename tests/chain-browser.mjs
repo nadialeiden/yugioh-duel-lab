@@ -1,3 +1,4 @@
+import {enterLab} from './browser-entry.mjs';
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -16,7 +17,7 @@ try{
       Crypto.prototype.getRandomValues=function(array){if(array instanceof Uint32Array&&array.length===4){array.set([164,1,2,3]);return array;}return original.call(this,array);};
     });
     const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
-    await page.goto(base);await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);
+    await enterLab(page, base);await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);
     await page.locator('#start-practice').click();await page.locator('#decision-choices .action-choice').first().waitFor();
     if(width<780){
       const toggle=page.locator('#mobile-panel-toggle');

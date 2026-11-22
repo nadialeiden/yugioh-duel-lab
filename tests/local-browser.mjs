@@ -1,3 +1,4 @@
+import {enterLab} from './browser-entry.mjs';
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.BROWSER_PATH||(process.platform==='win32'?'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe':undefined),headless:true});
@@ -6,7 +7,7 @@ try{
   const host=await hostContext.newPage(),guest=await guestContext.newPage(),errors=[],guestStates=[];
   for(const page of [host,guest])page.on('pageerror',e=>errors.push(e.message));
   guest.on('websocket',socket=>socket.on('framereceived',frame=>{try{const value=JSON.parse(frame.payload);if(value.type==='state')guestStates.push(value);}catch{}}));
-  for(const page of [host,guest]){await page.goto('http://localhost:4173');await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);await page.getByRole('button',{name:'Local duel',exact:true}).click();}
+  for(const page of [host,guest]){await enterLab(page, undefined, page === host ? 'duelist1' : 'duelist2');await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);await page.getByRole('button',{name:'Local duel',exact:true}).click();}
   await host.locator('#create-room').click();await host.waitForFunction(()=>!!document.querySelector('.room-code-display'));
   const code=await host.locator('.room-code-display').textContent();console.log('Room created:',code);
   await guest.locator('#local-deck').selectOption('swordsoul');await guest.locator('#room-code').fill(code);await guest.locator('#join-room').click();

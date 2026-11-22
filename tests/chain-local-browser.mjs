@@ -1,3 +1,4 @@
+import {enterLab} from './browser-entry.mjs';
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.BROWSER_PATH||(process.platform==='win32'?'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe':undefined),headless:true});
@@ -7,7 +8,7 @@ try{
   const guestContext=await browser.newContext({viewport:{width:360,height:740},isMobile:true});
   const host=await hostContext.newPage(),guest=await guestContext.newPage(),errors=[];
   const idle=page=>page.waitForFunction(()=>!document.body.classList.contains('chain-playing'));
-  for(const page of [host,guest]){page.on('pageerror',e=>errors.push(e.message));await page.goto('http://localhost:4173');await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);await page.locator('[data-mode="local"]').click();}
+  for(const page of [host,guest]){page.on('pageerror',e=>errors.push(e.message));await enterLab(page, undefined, page === host ? 'duelist1' : 'duelist2');await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);await page.locator('[data-mode="local"]').click();}
   await host.locator('#create-room').click();await host.locator('.room-code-display').waitFor();
   await guest.locator('#local-deck').selectOption('swordsoul');await guest.locator('#room-code').fill(await host.locator('.room-code-display').textContent());await guest.locator('#join-room').click();await host.locator('#local-start').waitFor({state:'visible'});await host.locator('#local-start').click();
   await host.locator('#decision-panel .action-choice').filter({hasText:'Exosister Pax'}).filter({hasText:'Activate'}).click();

@@ -1,10 +1,11 @@
+import {enterLab} from './browser-entry.mjs';
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
 const browser=await chromium.launch({executablePath:process.env.BROWSER_PATH||(process.platform==='win32'?'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe':undefined),headless:true});
 try{
   for(const [width,height] of [[320,667],[390,844],[430,932]]){
     const page=await browser.newPage({viewport:{width,height},isMobile:true,hasTouch:true});
-    await page.goto(process.env.BASE_URL||'http://localhost:4173');await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);
+    await enterLab(page);await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);
     // Component regression: render eight cards, independently of opening-hand
     // randomness. Real engine/decision and chain interactions have separate E2E tests.
     await page.evaluate(async()=>{

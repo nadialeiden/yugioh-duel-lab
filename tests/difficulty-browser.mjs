@@ -1,3 +1,4 @@
+import {enterLab} from './browser-entry.mjs';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 
@@ -11,7 +12,7 @@ try {
     const page = await browser.newPage({viewport: {width, height}, isMobile: width < 780, acceptDownloads: true});
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto(base);
+    await enterLab(page, base);
     await page.locator('#start-practice:enabled').waitFor();
     const selector = page.getByLabel('AI difficulty');
     assert.deepEqual(await selector.locator('option').allTextContents(), ['Beginner', 'Standard', 'Expert']);

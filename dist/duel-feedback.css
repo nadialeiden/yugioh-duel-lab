@@ -10,10 +10,7 @@
 .account-error { color:var(--danger);margin:0; }
 .account-error:empty { display:none; }
 .account-note { margin:16px 0 0; }
-.demo-credentials { margin-top:18px;color:var(--muted); }
-.demo-credentials summary { cursor:pointer; }
-.demo-credentials dl { display:grid;grid-template-columns:auto 1fr;gap:8px 16px; }
-.demo-credentials dd { margin:0; }
+.guest-sign-in { min-height:44px;margin-top:12px; }
 @media(max-width:780px) {
   .topbar-actions { gap:5px; }
   .account-button { max-width:104px;min-height:44px;padding:6px 9px; }

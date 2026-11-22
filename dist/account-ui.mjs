@@ -1,48 +1,21 @@
 import {$, escape, modal, closeModal, toast} from './ui.mjs';
-import {readProfile, saveDisplayName, signIn} from './profiles.mjs';
+import {readProfile, saveDisplayName, sessionEndpoint} from './profiles.mjs';
 
-export function showAccount({id, switchAccount, canSwitch, refreshName}) {
-  if (!id) {
-    modal('Sign in', `
-      <form id="demo-login" class="account-form">
-        <label for="login-id">Login ID</label>
-        <input id="login-id" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="64" required>
-        <label for="login-password">Password</label>
-        <input id="login-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
-        <p id="account-error" class="account-error" role="alert"></p>
-        <button class="primary" type="submit">Sign in</button>
-      </form>
-      <details class="demo-credentials">
-        <summary>Demo login details</summary>
-        <dl><dt>duelist1</dt><dd><code>DuelLab-101!</code></dd><dt>duelist2</dt><dd><code>DuelLab-102!</code></dd><dt>duelist3</dt><dd><code>DuelLab-103!</code></dd></dl>
-        <p>These are shared demo logins. Each account’s decks and display name are saved in this browser.</p>
-      </details>`);
-    const form = $('demo-login');
-    form.onsubmit = async event => {
-      event.preventDefault();
-      const error = $('account-error');
-      const submit = form.querySelector('button[type="submit"]');
-      const controller = new AbortController();
-      const abort = () => controller.abort();
-      $('modal').addEventListener('close', abort, {once: true});
-      submit.disabled = true;
-      error.textContent = '';
+export function showAccount({id, expires, canSwitch, refreshName}) {
+  if (id === 'guest') {
+    const endTime = new Date(expires).toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+    modal('Guest pass', `
+      <p class="account-note">Your pass covers Practice and Learn and ends at ${escape(endTime)}.</p>
+      <p id="account-error" class="account-error" role="alert"></p>
+      <button id="guest-sign-in" class="primary guest-sign-in" type="button">Sign in</button>`);
+    $('guest-sign-in').onclick = () => {
       try {
         canSwitch();
-        const fields = new FormData(form);
-        const account = await signIn(fields.get('username'), fields.get('password'), controller.signal);
-        if (!form.isConnected || !$('modal').open) return;
-        switchAccount(account);
-        closeModal();
-        toast('Signed in as ' + readProfile(account).name + '.');
-      } catch (failure) {
-        if (form.isConnected && !controller.signal.aborted) error.textContent = failure.message;
-      } finally {
-        $('modal').removeEventListener('close', abort);
-        submit.disabled = false;
+        location.assign('/signin.html' + location.hash);
+      } catch (error) {
+        $('account-error').textContent = error.message;
       }
     };
-    $('login-id').focus();
     return;
   }
 
@@ -66,13 +39,17 @@ export function showAccount({id, switchAccount, canSwitch, refreshName}) {
       $('account-error').textContent = error.message;
     }
   };
-  $('account-logout').onclick = () => {
+  $('account-logout').onclick = async event => {
+    const button = event.currentTarget;
+    button.disabled = true;
     try {
-      switchAccount(null);
-      closeModal();
-      toast('Signed out.');
+      canSwitch();
+      const response = await fetch(sessionEndpoint, {method: 'DELETE'});
+      if (!response.ok) throw new Error('Could not sign out. Try again.');
+      location.replace('/signin.html' + location.hash);
     } catch (error) {
       $('account-error').textContent = error.message;
+      button.disabled = false;
     }
   };
 }
