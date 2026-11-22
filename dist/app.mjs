@@ -109,8 +109,12 @@ function setRailExpanded(expanded){document.querySelector('.right-rail').classLi
 function showRail(tab){setRailExpanded(true);for(const name of ['decision','log','evaluation']){$(name+'-panel').classList.toggle('hidden',name!==tab);$(name+'-tab').classList.toggle('active',name===tab);$(name+'-tab').setAttribute('aria-selected',String(name===tab));}}
 function present(state){
   currentState=state;
+  if(state.winner!==null)ended=true;
   document.body.classList.toggle('duel-visible',duelMode===mode);
-  renderBoard(state,viewer);renderLog(state);renderReview(review,state);
+  renderBoard(state,viewer);
+  if(ended)chainPlayback.reset();
+  else chainPlayback.update(state,viewer);
+  renderLog(state);renderReview(review,state);
   renderDecision(takeover&&session?{...state,prompt:session.state.prompt}:state,viewer,{coach:duelMode==='practice'&&$('coach-toggle').checked,thinking:duelMode==='practice'&&session?.state.prompt?.player===botPlayer,ended,takeover});
   $('decision-panel').inert=chainPlayback.busy;
   if(state.prompt?.player===viewer&&state.promptId!==present.lastPrompt){present.lastPrompt=state.promptId;if(!chainPlayback.busy)showRail('decision');}
@@ -122,7 +126,7 @@ function updateSession(state){
   const schedule=(callback,delay)=>chainPlayback.whenIdle().then(()=>{if(session===activeSession&&session.state.promptId===state.promptId&&!ended)botTimer=setTimeout(callback,delay);});
   present(session.view(viewer));
   if(roomRole==='host'&&duelMode==='local')room.send({type:'state',state:session.view(viewer^1),viewer:viewer^1,decks:session.decks.map(d=>({name:d.name})),ended});
-  if(state.winner!==null){ended=true;if(duelMode==='practice')showRail('evaluation');return;}
+  if(state.winner!==null){if(duelMode==='practice')showRail('evaluation');return;}
   if(state.prompt?.type===16&&!state.prompt.forced&&!state.prompt.selects.length){const id=state.promptId;schedule(()=>{if(session?.state.promptId===id&&!ended)session.respond({type:8,index:null},id,state.prompt.player);},40);return;}
   if(duelMode==='practice'&&state.prompt?.player===botPlayer&&!takeover){
     const promptId=state.promptId;
@@ -171,11 +175,12 @@ async function startPractice(){
 function confirmConcede(){
   if(!currentState||ended)return;
   modal('Concede this duel?',`<p>Your current duel will end. Saved decks remain available.</p><div class="modal-actions"><button class="subtle" data-action="close-modal">Keep playing</button><button class="primary" id="confirm-concede">Concede duel</button></div>`);
-  $('confirm-concede').onclick=()=>{closeModal();clearTimeout(botTimer);ended=true;if(roomRole==='guest'){room.send({type:'surrender'});return;}session.state.winner=viewer^1;session.state.prompt=null;session.log('Player '+(viewer+1)+' concedes.');updateSession(session.state);};
+  $('confirm-concede').onclick=()=>{closeModal();clearTimeout(botTimer);ended=true;if(roomRole==='guest'){chainPlayback.reset();room.send({type:'surrender'});return;}session.state.winner=viewer^1;session.state.prompt=null;session.log('Player '+(viewer+1)+' concedes.');updateSession(session.state);};
 }
 function newDuel(){
   if(currentState&&!ended&&currentState.winner===null){confirmConcede();return;}
   clearTimeout(botTimer);session?.destroy();session=null;review=null;currentState=null;ended=false;duelMode=null;takeover=false;
+  chainPlayback.reset();
   room?.close();room=null;roomRole=null;guestDeck=null;renderBoard(null);renderLog(null);document.body.classList.remove('duel-live','duel-visible');$('arena').classList.remove('live-duel');setMode(mode);
   $('decision-panel').innerHTML='<div class="waiting-icon">◇</div><h2>Ready for another?</h2><p class="muted">Choose your decks and take your seat.</p>';
 }
@@ -208,7 +213,7 @@ async function onRoomMessage(raw){
       case 'surrender':if(roomRole==='host'&&session){ended=true;session.state.winner=0;session.state.prompt=null;session.log('Player 2 concedes.');updateSession(session.state);}break;
       case 'error':case 'rejected':setRoomStatus(escape(message.message||'This deck was rejected.'));toast(message.message||'Room action rejected.');break;
       case 'disconnected':case 'connection-closed':
-        if(roomRole){clearTimeout(botTimer);ended=true;setRoomStatus('Room connection closed. Create or join another room to play again.');$('local-start').classList.add('hidden');if(currentState&&duelMode==='local'){$('decision-panel').innerHTML='<h2>Opponent disconnected.</h2><p class="muted">This duel has ended. Start a new local room to continue.</p>';$('surrender').disabled=true;}roomRole=null;}
+        if(roomRole){clearTimeout(botTimer);ended=true;chainPlayback.reset();setRoomStatus('Room connection closed. Create or join another room to play again.');$('local-start').classList.add('hidden');if(currentState&&duelMode==='local'){$('decision-panel').innerHTML='<h2>Opponent disconnected.</h2><p class="muted">This duel has ended. Start a new local room to continue.</p>';$('surrender').disabled=true;}roomRole=null;}
         break;
     }
   }catch(error){toast(error.message);if(roomRole==='host')room.send({type:'rejected',message:error.message});}

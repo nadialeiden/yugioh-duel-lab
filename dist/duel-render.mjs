@@ -51,7 +51,6 @@ export function renderBoard(state,viewer=0){
   $('phase-strip').innerHTML=[['Draw','DP'],['Standby','SP'],['Main 1','M1'],['Battle','BP'],['Main 2','M2'],['End','EP']].map(([name,label])=>`<span class="phase-pill${phase===name?' active':''}" title="${name}">${label}</span>`).join('');
   renderTurnStatus(state,viewer);if(!state)$('turn-marker').innerHTML='TURN <strong>—</strong>';
   for(const [suffix,player]of [['you',viewer],['opponent',enemy]]){$('lp-'+suffix).textContent=Number(state?.lp?.[player]??8000).toLocaleString();$('lp-bar-'+suffix).style.width=Math.min(100,(state?.lp?.[player]??8000)/80)+'%';}
-  chainPlayback.update(state,viewer);
 }
 export function inspectCard(id,{popup=false,instance=null,controller,location,sequence,allowActions=false,updateInspector=true}={}){
   const c=cards.get(+id);if(!c)return;

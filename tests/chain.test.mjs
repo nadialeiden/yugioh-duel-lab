@@ -41,3 +41,16 @@ test('Skip finishes immediately and a new duel resets event deduplication',async
   playback.update({...state,duelId:'duel-b'},0);assert.equal(playback.busy,true);
   playback.reset();assert.equal(playback.busy,false);assert.equal(playback.last,null);
 });
+test('reset releases the ended duel without disrupting the next duel’s animation controls',{timeout:1000},async()=>{
+  const state=resolvedChain();
+  const playback=new ChainPlayback({render:()=>{},timings:{activate:5000}});
+  playback.update(state,0);
+  const oldDuelIdle=playback.whenIdle();
+  playback.reset();
+  playback.update({...state,duelId:'duel-b'},1);
+  await oldDuelIdle;
+  assert.equal(playback.busy,true);
+  playback.skip();
+  await playback.whenIdle();
+  assert.equal(playback.last.kind,'end');
+});

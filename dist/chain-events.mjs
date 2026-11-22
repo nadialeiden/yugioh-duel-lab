@@ -47,6 +47,7 @@ export class ChainPlayback {
       this.last=this.queue.shift();
       this.render(this.last,this.viewer,true,this.state);
       await new Promise(resolve => { this.release=resolve;this.timer=setTimeout(resolve,this.timings[this.last.kind] ?? 600); });
+      if (generation!==this.generation) return;
       this.release=null;
     }
     if (generation!==this.generation) return;
@@ -61,9 +62,11 @@ export class ChainPlayback {
     this.queue=[];clearTimeout(this.timer);this.release?.();
   }
   reset() {
+    const wasBusy=this.busy;
     this.generation++;clearTimeout(this.timer);this.release?.();this.release=null;
     this.queue=[];this.last=null;this.seen=0;this.duelId=null;this.busy=false;
-    this.onBusyChange(false);this.waiters.splice(0).forEach(resolve=>resolve());
+    if(wasBusy)this.onBusyChange(false);
+    this.waiters.splice(0).forEach(resolve=>resolve());
     this.render(null,0,false,null);
   }
 }

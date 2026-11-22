@@ -15,7 +15,17 @@ try{
   await host.locator('#decision-panel .action-choice').filter({hasText:'Exosister Pax'}).filter({hasText:'Activate'}).click();
   await host.getByRole('button',{name:'Confirm play',exact:true}).click();
   await host.locator('#decision-panel .action-choice').filter({hasText:'Your Spell / Trap Zone 3'}).click();await host.locator('#confirm-selection').click();
-  await guest.locator('#decision-panel .action-choice').filter({hasText:'Ash Blossom'}).waitFor();await idle(guest);await guest.locator('#decision-panel .action-choice').filter({hasText:'Ash Blossom'}).click();
+  const ash=guest.locator('#decision-panel .action-choice').filter({hasText:'Ash Blossom'});
+  await ash.waitFor();await idle(guest);
+  assert.equal(await guest.locator('#room-title').textContent(),'Opponent’s turn');
+  assert.equal(await guest.locator('#chain-status').textContent(),'Your response window');
+  await guest.locator('#chain-hide').click();
+  await guest.locator('#chain-overlay').waitFor({state:'hidden'});
+  await guest.locator('#enemy-spells .game-card').click();
+  assert.equal(await guest.locator('#modal-title').textContent(),'Exosister Pax');
+  await guest.locator('#close-modal').click();
+  await ash.click();
+  await guest.locator('#chain-open').click();
   await host.locator('.live-chain-card.opponent-link[data-link="2"]').waitFor();await guest.locator('.live-chain-card.your-link[data-link="2"]').waitFor();await idle(host);
   assert.ok((await host.locator('#chain-overlay').textContent()).includes('Ash Blossom'));
   await host.locator('#decision-panel .action-choice').filter({hasText:'Pass response'}).click();
@@ -24,11 +34,20 @@ try{
   for(let i=0;i<100;i++){
     for(const page of [host,guest]){
       if(await page.evaluate(()=>document.body.classList.contains('chain-playing')))continue;
-      const pass=page.locator('#decision-panel .action-choice').filter({hasText:/^Pass response$/});if(await pass.count())await pass.click();
+      const choices=page.locator('#decision-panel .action-choice');
+      const pass=choices.filter({hasText:/^Pass response$/});
+      if(await choices.count()>1&&await pass.count())await pass.click();
     }
     if(await host.locator('#chain-overlay[data-kind="end"][data-busy="false"]').count()&&await guest.locator('#chain-overlay[data-kind="end"][data-busy="false"]').count())break;
     await host.waitForTimeout(150);
   }
   for(const page of [host,guest]){await page.locator('#chain-details').click();assert.equal(await page.locator('.live-chain-card').count(),2);assert.equal(await page.locator('.live-chain-card.negated[data-link="1"]').count(),1);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);}
-  assert.deepEqual(errors,[]);console.log('Two mobile clients: host Pax, guest Ash, visible reverse resolution and negation on both views.');
+  await guest.locator('#surrender').click();await guest.locator('#confirm-concede').click();
+  for(const page of [host,guest]){
+    await page.waitForFunction(()=>document.querySelector('#room-title').textContent==='Duel finished');
+    await page.locator('#chain-overlay').waitFor({state:'hidden'});
+    await page.locator('#chain-open').waitFor({state:'hidden'});
+    await idle(page);
+  }
+  assert.deepEqual(errors,[]);console.log('Two mobile clients: guest can hide the chain on the host’s turn, inspect Pax, and respond. Both panels close at duel end.');
 }finally{await browser.close();}

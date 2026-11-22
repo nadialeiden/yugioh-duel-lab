@@ -10,7 +10,7 @@ const errors=[];
 async function idle(page){await page.waitForFunction(()=>!document.body.classList.contains('chain-playing'),null,{timeout:25000});}
 async function choose(page,text){await idle(page);await page.locator('#decision-panel .action-choice').filter({hasText:text}).first().click();}
 try{
-  for(const [width,height] of [[390,844],[1440,1000]]){
+  for(const [width,height] of [[320,667],[390,844],[1440,1000]]){
     const context=await browser.newContext({viewport:{width,height},isMobile:width<780});
     await context.addInitScript(()=>{
       const original=Crypto.prototype.getRandomValues;
@@ -29,9 +29,27 @@ try{
     await page.getByRole('button',{name:'Confirm play',exact:true}).click();
     await choose(page,'Your Spell / Trap Zone 3');await page.locator('#confirm-selection').click();
     await page.locator('.live-chain-card.opponent-link[data-link="2"]').waitFor({timeout:20000});
-    assert.ok((await page.locator('#chain-overlay').textContent()).includes('Ash Blossom'));
-    assert.ok((await page.locator('#chain-overlay').textContent()).includes('OPPONENT'));
+    const panel=page.locator('#chain-overlay'), reopen=page.locator('#chain-open');
+    assert.ok((await panel.textContent()).includes('Ash Blossom'));
+    assert.ok((await panel.textContent()).includes('OPPONENT'));
+    await page.locator('#chain-hide').click();
+    await panel.waitFor({state:'hidden'});
+    await reopen.waitFor({state:'visible'});
     await idle(page);
+    await page.locator('nav [data-mode="decks"]').click();
+    await reopen.waitFor({state:'hidden'});
+    await page.locator('nav [data-mode="practice"]').click();
+    await panel.waitFor({state:'hidden'});
+    await reopen.click();
+    await panel.waitFor({state:'visible'});
+    assert.ok(await page.locator('.live-chain-card.opponent-link[data-link="2"]').isVisible());
+    for(const mode of ['decks','learn','local']){
+      await page.locator(`nav [data-mode="${mode}"]`).click();
+      await panel.waitFor({state:'hidden'});
+      await reopen.waitFor({state:'hidden'});
+      await page.locator('nav [data-mode="practice"]').click();
+      await panel.waitFor({state:'visible'});
+    }
     if(width<780){
       const box=await page.locator('#mobile-panel-toggle').boundingBox();assert.ok(box.y+box.height<=height+1,'Decision handle stays inside the viewport.');
       await page.screenshot({path:new URL('../qa/mobile-opponent-chain.png',import.meta.url).pathname.slice(process.platform==='win32'?1:0),fullPage:true});
@@ -58,7 +76,14 @@ try{
     assert.equal(await page.locator('.live-chain-card').count(),3,'Pax / Ash / Called by chain retains all three links.');
     assert.equal(await page.locator('.live-chain-card.negated[data-link="2"]').count(),1,'Ash is visibly negated.');
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-    console.log(width+'px: real Pax / AI Ash / Called by chain visible and resolved, mobile controls reachable.');
+    await page.locator('#surrender').click();
+    await page.locator('#confirm-concede').click();
+    await page.waitForFunction(()=>document.querySelector('#room-title').textContent==='Duel finished');
+    await panel.waitFor({state:'hidden'});
+    await reopen.waitFor({state:'hidden'});
+    await idle(page);
+    assert.equal(await page.locator('.live-chain-card').count(),0);
+    console.log(width+'px: real chain hides, reopens, follows the Practice tab, and clears on concession.');
     await context.close();
   }
   assert.deepEqual(errors,[]);

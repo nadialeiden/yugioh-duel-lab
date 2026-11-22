@@ -51,9 +51,12 @@
   overflow:hidden;
   backdrop-filter:blur(12px);
 }
-.chain-overlay.has-chain { display:block; }
+.chain-open { display:none;white-space:nowrap; }
+body.duel-visible .chain-open:not([hidden]) { display:inline-flex;align-items:center; }
+body.duel-visible .chain-overlay:not([hidden]) { display:block; }
 .chain-heading { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px; }
 .chain-heading>div { min-width:0; }
+.chain-actions { display:flex;flex-shrink:0;gap:6px; }
 .chain-eyebrow { display:block;font-size:.7rem;letter-spacing:.1em;color:var(--purple);margin-bottom:5px; }
 .chain-heading strong { display:block;font-size:1rem;color:var(--text);line-height:1.4; }
 .chain-control { flex-shrink:0;min-height:44px;min-width:50px;border:1px solid #596780;padding:6px 12px;font-size:.875rem;background:#273345; }
@@ -85,11 +88,12 @@
   body.duel-visible .topbar nav { height:40px; }
   body.duel-visible .brand { font-size:1rem; }
   body.duel-visible main { padding:8px 8px 0; }
-  body.duel-visible .duel-heading { height:44px;align-items:center; }
+  body.duel-visible .duel-heading { height:44px;align-items:center;gap:8px; }
   body.duel-visible .duel-heading .tiny-label { display:none; }
   body.duel-visible .duel-heading h1 { margin:0;font-size:.95rem; }
   body.duel-visible .duel-tools { padding:0; }
   body.duel-visible .duel-tools button { min-height:40px; }
+  body.duel-visible .duel-tools .chain-open { min-height:44px; }
   body.duel-visible .arena { height:calc(100dvh - 214px - env(safe-area-inset-bottom,0px));min-height:525px;padding:6px; }
   body.duel-visible .field-half { grid-template-columns:44px minmax(0,1fr) 44px;gap:5px; }
   body.duel-visible .zone-row { gap:4px; }
@@ -135,10 +139,11 @@
   .action-choice small { font-size:.8rem; }
   .selection-footer { margin-top:6px;padding-bottom:5px;z-index:1; }
   .selection-footer button { min-height:48px;font-size:.9rem; }
-  .chain-overlay { position:fixed;z-index:45;top:98px;bottom:auto;left:8px;right:8px;width:auto;max-width:490px; }
-  .chain-heading { padding:9px 11px; }
+  .chain-overlay { position:fixed;z-index:45;top:142px;bottom:auto;left:8px;right:8px;width:auto;max-width:490px; }
+  .chain-heading { gap:8px;padding:9px 11px; }
   .chain-heading strong { font-size:.9rem; }
   .chain-eyebrow { font-size:.65rem; }
+  .chain-control { min-width:44px;padding:6px 9px;font-size:.8rem; }
   .live-chain-links { max-height:32dvh;padding:0 8px;gap:6px; }
   .live-chain-card { flex-basis:145px;min-height:82px;padding:7px;gap:7px; }
   .live-chain-card img { width:34px;height:50px; }
