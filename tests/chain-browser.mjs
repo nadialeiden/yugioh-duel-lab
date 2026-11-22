@@ -59,12 +59,13 @@ try{
       await page.waitForTimeout(150);
       if(await page.locator('#chain-overlay[data-kind="end"][data-busy="false"]').count())break;
       if(await page.evaluate(()=>document.body.classList.contains('chain-playing')))continue;
-      const title=await page.locator('#decision-panel h2').textContent();
-      if(/Choose card|Choose materials|Choose a zone/.test(title)){
+      const confirm=page.getByRole('button',{name:'Confirm selection',exact:true});
+      if(await confirm.count()){
         await page.locator('#decision-choices .action-choice').first().click();
-        const confirm=page.locator('#confirm-selection');if(await confirm.count()&&await confirm.isEnabled())await confirm.click();
+        if(await confirm.isEnabled())await confirm.click();
       }else{
-        const no=page.locator('#decision-choices .action-choice').filter({hasText:/^(No|Pass response)$/}).first();if(await no.count())await no.click();
+        const choices=page.locator('#decision-choices .action-choice');
+        const no=choices.filter({hasText:/^(No|Pass response)$/}).first();if(await choices.count()>1&&await no.count())await no.click();
       }
     }
     if(!await page.locator('#chain-overlay[data-kind="end"][data-busy="false"]').count()){

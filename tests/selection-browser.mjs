@@ -68,8 +68,22 @@ try{
     assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[]);
     await confirmPlay.click();
     assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[{type:1,action:5,index:1}]);
+    await page.evaluate(()=>{
+      const selects=window.selectionCandidates.map(card=>({...card,location:2}));
+      window.selectionResponses=[];
+      window.showSelectionPrompt({type:15,player:0,min:1,max:1,selects,selectionHint:501,drawnBeforeSelection:1});
+    });
+    await page.getByRole('heading',{name:'Discard 1 card',exact:true}).waitFor();
+    await page.getByText('1 card drawn.',{exact:true}).waitFor();
+    await second.click();await page.locator('#confirm-selection').click();
+    assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[{type:5,indicies:[1]}]);
+    await page.evaluate(()=>{
+      window.showSelectionPrompt({type:15,player:0,min:2,max:2,selects:window.selectionCandidates,selectionHint:506});
+    });
+    assert.match(await page.locator('#decision-panel h2').textContent(),/add to your hand/i);
+    assert.equal(await page.getByText('1 card drawn.',{exact:true}).count(),0);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-    console.log(width+'px: swap cards and zones, clear pending plays, and select the intended Martha and Mikailis effects.');
+    console.log(width+'px: change pending plays, select effects, and see the discard and add-to-hand steps.');
     await page.close();
   }
   assert.deepEqual(errors,[]);

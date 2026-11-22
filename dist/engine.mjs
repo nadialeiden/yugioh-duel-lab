@@ -2,6 +2,7 @@ import createCore, {OcgDuelMode} from './vendor/ocg/index.js';
 import {safeView} from './model.mjs';
 import {recordChainEvent} from './chain-events.mjs';
 const decisions = new Set([10,11,12,13,14,15,16,18,19,20,21,22,23,24,25,26,132,140,141,142,143]);
+const cardSelections = new Set([15,20,23,26]);
 const phases = {1:'Draw',2:'Standby',4:'Main 1',8:'Battle',16:'Battle',32:'Damage',64:'Damage calculation',128:'Battle end',256:'Main 2',512:'End'};
 export function shuffledDeck(list,seed){
   let value=seed.reduce((a,n)=>Math.imul(a^Number(BigInt(n)&0xffffffffn),16777619)>>>0,2166136261)||1;
@@ -16,6 +17,7 @@ export class DuelSession {
     this.history = []; this.closed = false; this.processing = false;
     this.botObservations = {drawTax:[false,false], hint:null, attack:null};
     this.selectionHints = new Map();
+    this.linkDraws = [0,0];
   }
   async start(decks) {
     this.decks = structuredClone(decks);
@@ -42,8 +44,15 @@ export class DuelSession {
   log(text) { this.state.log.push({turn:this.state.turn,text}); if(this.state.log.length>250)this.state.log.shift(); }
   consume(m) {
     if(decisions.has(m.type)){
-      this.state.prompt=m;this.state.promptId++;
-      this.botObservations.hint=this.selectionHints.get(m.player) ?? null;
+      const prompt = {...m};
+      const hint = this.selectionHints.get(m.player);
+      if (hint !== undefined) prompt.selectionHint = hint;
+      if (cardSelections.has(m.type) && this.linkDraws[m.player]) {
+        prompt.drawnBeforeSelection = this.linkDraws[m.player];
+        this.linkDraws[m.player] = 0;
+      }
+      this.state.prompt=prompt;this.state.promptId++;
+      this.botObservations.hint=hint ?? null;
       this.selectionHints.delete(m.player);
       return;
     }
@@ -56,15 +65,18 @@ export class DuelSession {
       case 41: this.botObservations.attack=null;this.state.phase=phases[m.phase]||'Phase '+m.phase; break;
       case 60: case 62: case 64: this.log((m.type===62?'Special Summon: ':m.type===64?'Flip Summon: ':'Normal Summon: ')+this.name(m.code)); break;
       case 70: this.lastActivation={...m}; this.log('Chain '+m.chain_size+': '+this.name(m.code)); break;
-      case 72: this.log('Resolve Chain Link '+m.chain_size); break;
+      case 72: this.linkDraws.fill(0);this.log('Resolve Chain Link '+m.chain_size); break;
       case 73: {
+        this.linkDraws.fill(0);
         const link=this.state.chain.find(item=>item.number===m.chain_size);
         if(link?.status==='resolved'&&this.name(link.code)==='Maxx "C"')this.botObservations.drawTax[link.player]=true;
         break;
       }
-      case 74: break;
+      case 74: this.linkDraws.fill(0);break;
       case 75: case 76: this.log('Chain Link '+m.chain_size+' negated.'); break;
-      case 90: this.log('Player '+(m.player+1)+' draws '+m.drawn.length+' card(s).'); break;
+      case 90:
+        if (this.state.chain.some(link => link.status === 'resolving')) this.linkDraws[m.player] += m.drawn.length;
+        this.log('Player '+(m.player+1)+' draws '+m.drawn.length+' card(s).'); break;
       case 91: case 100: this.state.lp[m.player]=Math.max(0,this.state.lp[m.player]-m.amount); this.log('Player '+(m.player+1)+(m.type===100?' pays ':' takes ')+m.amount+' LP.'); break;
       case 92: this.state.lp[m.player]+=m.amount; break;
       case 94: this.state.lp[m.player]=m.lp; break;

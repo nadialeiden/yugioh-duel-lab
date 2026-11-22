@@ -18,14 +18,14 @@ const mainPhase = prompt => prompt?.type === 11 && prompt.player === 0;
 const choices = session => describePrompt(session.state.prompt, cardName, effectText).choices;
 const option = (session, code, action) => choices(session).find(choice => choice.card?.code === code && choice.response?.action === action);
 
-async function startDuel(t, seed) {
+async function startDuel(t, seed, duelDecks = [exosister, swordsoul]) {
   const session = new DuelSession({
     cards, seed: [seed, 2n, 3n, 4n],
     readScript: name => scripts[name] || scripts['official/' + name] || null,
     onError: error => assert.fail(error.message),
   });
   t.after(() => session.destroy());
-  await session.start([exosister, swordsoul]);
+  await session.start(duelDecks);
   assert.ok(mainPhase(session.state.prompt));
   assert.ok(session.state.players[0].monsters.every(card => !card));
   return session;
@@ -89,4 +89,33 @@ test('description decoding still resolves other cards and system prompts', () =>
   assert.equal(effectText(31n), 'Attack directly?');
   assert.equal(effectText(BigInt(ash) << 20n), cards.get(ash).strings[0]);
   assert.equal(effectText((BigInt(betrayal) << 20n) | 1n), cards.get(betrayal).strings[1]);
+});
+
+test('Betrayal identifies adding cards and discarding as separate decisions', async t => {
+  const session = await startDuel(t, 4n);
+  assert.ok(session.respond(option(session, betrayal, 5).response));
+  stepUntil(session, prompt => prompt?.type === 15);
+  const add = session.state.prompt;
+  assert.equal(add.selectionHint, 506);
+  assert.equal(add.min, 2);
+  assert.ok(session.respond({type:5,indicies:[0,1]}));
+  stepUntil(session, prompt => prompt?.type === 15);
+  const discard = session.state.prompt;
+  assert.equal(describePrompt(discard).title, 'Discard 1 card');
+  assert.equal(discard.drawnBeforeSelection, undefined, 'Cards added to the hand did not come from a draw');
+});
+
+test('Celtic Mystic reports the completed draw before asking which cards to discard', async t => {
+  const celticMystic = 50073633;
+  const rolad = decks.find(deck => deck.id === 'rolad-mitsurugi');
+  const session = await startDuel(t, 26n, [rolad, swordsoul]);
+  assert.ok(session.respond(option(session, celticMystic, 0).response));
+  stepUntil(session, prompt => prompt?.type === 15);
+  assert.equal(session.view(1).prompt, null);
+  const decision = describePrompt(session.view(0).prompt);
+  assert.equal(decision.title, 'Discard 2 cards');
+  assert.equal(decision.note, '3 cards drawn.');
+  assert.ok(session.respond({type:5,indicies:[0,1]}));
+  stepUntil(session, mainPhase);
+  assert.equal(session.state.prompt.drawnBeforeSelection, undefined);
 });

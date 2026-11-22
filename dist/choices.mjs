@@ -1,7 +1,7 @@
 import { decodePlaces } from './model.mjs';
 export const R = {BATTLE:0, IDLE:1, EFFECT:2, YESNO:3, OPTION:4, CARD:5, CODES:6, UNSELECT:7, CHAIN:8, DISFIELD:9, PLACE:10, POSITION:11, TRIBUTE:12, COUNTER:13, SUM:14, SORT:15, RACE:16, ATTRIB:17, ANNOUNCE:18, NUMBER:19, RPS:20};
 const raceNames = ['Warrior','Spellcaster','Fairy','Fiend','Zombie','Machine','Aqua','Pyro','Rock','Winged Beast','Plant','Insect','Thunder','Dragon','Beast','Beast-Warrior','Dinosaur','Fish','Sea Serpent','Reptile','Psychic','Divine-Beast','Creator God','Wyrm','Cyberse','Illusion'];
-export function describePrompt(m, name = id => String(id), effect = id => String(id)) {
+export function describePrompt(m, name = id => String(id), effect = id => String(id), selectionText = () => '') {
   const p = {title:'Choose an action', choices:[], multiple:false, min:1, max:1};
   const add = (label, response, card, detail = '') => p.choices.push({label, response, card, detail});
   const cardOptions = (list, type) => list.forEach((c,i) => add(name(c.code), {type,index:i}, c, c.description ? effect(c.description) : ''));
@@ -34,7 +34,11 @@ export function describePrompt(m, name = id => String(id), effect = id => String
       p.title = m.forced ? 'Choose a mandatory chain effect' : 'Response window · Build the chain';
       cardOptions(m.selects,R.CHAIN); if (!m.forced) add('Pass response',{type:R.CHAIN,index:null}); break;
     case 15: case 20: case 23: {
-      p.title = m.type === 20 ? 'Choose monsters to Tribute' : m.type === 23 ? 'Choose materials · ' + (m.select_max ? 'total at least ' : 'required total ') + m.amount : 'Choose card(s)';
+      const instruction = selectionText(m.selectionHint);
+      if (m.type === 23) p.title = (instruction || 'Choose materials') + ' · ' + (m.select_max ? 'total at least ' : 'required total ') + m.amount;
+      else if (m.selectionHint === 501) {
+        p.title = m.min === m.max && m.min > 0 ? 'Discard ' + m.min + (m.min === 1 ? ' card' : ' cards') : 'Choose cards to discard';
+      } else p.title = instruction || (m.type === 20 ? 'Choose monsters to Tribute' : 'Choose card(s)');
       p.multiple = true; p.min = m.min; p.max = m.max;
       if (m.type === 23 && m.select_max) {
         p.min = m.selects_must.length ? 0 : 1;
@@ -47,7 +51,7 @@ export function describePrompt(m, name = id => String(id), effect = id => String
       break;
     }
     case 26:
-      p.title = 'Choose materials or finish selection';
+      p.title = selectionText(m.selectionHint) || 'Choose materials or finish selection';
       m.select_cards.forEach((c,index) => add('Select ' + name(c.code),{type:R.UNSELECT,index},c));
       m.unselect_cards.forEach((c,index) => add('Unselect ' + name(c.code),{type:R.UNSELECT,index:index + m.select_cards.length},c));
       if (m.can_finish || m.can_cancel) add(m.can_finish ? 'Finish selection' : 'Cancel',{type:R.UNSELECT,index:null}); break;
@@ -79,6 +83,11 @@ export function describePrompt(m, name = id => String(id), effect = id => String
     case 132:
       p.title = 'Rock, Paper, Scissors'; [[1,'Scissors'],[2,'Rock'],[3,'Paper']].forEach(([value,label])=>add(label,{type:R.RPS,value})); break;
     default: throw new Error('Unsupported decision from core: ' + m.type);
+  }
+  if (m.drawnBeforeSelection) {
+    const number = m.drawnBeforeSelection;
+    const drawn = number + (number === 1 ? ' card drawn.' : ' cards drawn.');
+    p.note = p.note ? drawn + ' ' + p.note : drawn;
   }
   return p;
 }
