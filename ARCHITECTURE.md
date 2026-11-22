@@ -100,7 +100,7 @@ Selection prompts keep pending choices in renderer state until explicit confirma
 
 Turn ownership is rendered from `turnPlayer === viewer`, independently of whose response is requested. It appears in the heading, turn marker, and mobile drawer so a response during the opponent's turn does not misidentify the active player. Candidate rows include an independent Read card button, which opens the inspector without selecting or submitting anything. Setup deck selectors use a read-only Main/Extra/Side preview. The turn/preview browser regression verifies both player perspectives, unchanged pending selections, and no engine responses from inspection.
 
-The interface tutorial is separate state. Its sample chain is a deterministic demonstration: Pax pays 800 LP, Ash is discarded to respond, Called by the Grave targets that Ash, and the chain resolves backward. Buttons can step, play, pause, or reset the sequence. This demonstration never submits a response to the live duel engine.
+The Learn tour uses scripted examples for the first turn and chain. The first-turn example lets the user inspect Stella, change or confirm her Monster Zone, and end the turn. The sample chain shows Pax, Ash Blossom, and Called by the Grave resolving in reverse order. Users can read the response card, step in either direction, play, pause, or reset the sequence. Card previews reuse the main inspector dialog. Demonstration choices stay in the lesson and never submit a response to the live duel engine.
 
 ## Local and hosted room transport
 

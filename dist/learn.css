@@ -1,0 +1,133 @@
+.learn-screen .lesson { min-width: 0; }
+.learn-screen .lesson h2:focus { outline: none; }
+.learn-steps, .learn-glossary {
+  display: grid;
+  gap: .7rem;
+  margin-block: 1rem 1.4rem;
+}
+.learn-steps { padding-inline-start: 1.65rem; }
+.learn-steps li { padding-inline-start: .35rem; }
+.learn-steps li::marker, .learn-glossary dt { color: var(--accent); font-weight: 700; }
+.learn-glossary > div {
+  border: 1px solid var(--edge);
+  border-radius: .6rem;
+  padding: .8rem 1rem;
+  background: #111b27;
+}
+.learn-glossary dd { margin: .3rem 0 0; }
+.learn-inspect {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  justify-content: stretch;
+}
+.learn-inspect p { margin: .35rem 0 0; }
+.learn-inspect button, .learn-actions button, .chain-controls button, #chain-read { min-height: 44px; }
+.learn-turn-demo, .learn-phase-demo, .learn-chain-demo { padding: clamp(.7rem, 3vw, 1.5rem); }
+.learn-turn-bar {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: .25rem .8rem;
+  background: #122629;
+  border: 1px solid #41655f;
+  border-radius: .5rem;
+  padding: .55rem .7rem;
+  color: var(--accent);
+}
+.learn-turn-bar span { color: var(--text); font-size: .85rem; }
+.learn-turn-bar.opponent-turn { background: #282339; border-color: #746692; color: #d8c6ff; }
+.learn-turn-grid {
+  width: 100%;
+  display: grid;
+  gap: .75rem;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+}
+.learn-mat, .learn-decision {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: .55rem;
+  padding: .7rem;
+  border: 1px solid #48605f;
+  border-radius: .5rem;
+  background: #15262f;
+}
+.learn-zones {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(.2rem, 1vw, .55rem);
+}
+.learn-zones .tour-zone {
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  aspect-ratio: 5 / 7;
+  padding: 0;
+  font-size: .75rem;
+}
+.learn-zones .tour-zone:disabled:has(img) { opacity: 1; }
+.learn-card {
+  display: grid;
+  position: relative;
+  place-items: end center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #4d7774;
+  border-radius: .3rem;
+  background: radial-gradient(ellipse at 50% 28%, #395c62, #182e3b 72%);
+}
+.learn-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.learn-card strong {
+  z-index: 1;
+  width: 100%;
+  padding: .22rem .1rem;
+  background: #101b27eb;
+  color: #eff8f7;
+  text-align: center;
+  font-size: clamp(.6rem, 1.7vw, .78rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.learn-zones button:not(:disabled) { border-color: var(--accent); color: var(--text); }
+.learn-zones button[aria-pressed="true"], .learn-phases button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: #2c524b;
+  color: #ddfff3;
+}
+#tour-hand { padding: 0; }
+#tour-prompt { margin: 0; }
+.learn-actions { display: flex; flex-wrap: wrap; gap: .45rem; }
+.learn-turn-demo .tour-status, .learn-phase-demo .tour-status, .learn-chain-demo .tour-status { margin: 0; }
+.learn-phases { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; }
+.learn-phases button { min-height: 58px; padding: .35rem; font-size: .84rem; }
+.learn-phases small { display: block; color: var(--accent); letter-spacing: .08em; }
+.learn-chain-demo .tutorial-chain { width: 100%; min-height: clamp(6.75rem, 24vw, 10.5rem); align-items: center; padding: .6rem; }
+.learn-chain-demo .tutorial-link { width: min(26%, 100px); min-width: 0; }
+.learn-chain-card { aspect-ratio: 5 / 7; }
+.learn-chain-demo .tutorial-chain p { margin: 0; }
+.learn-chain-demo #chain-description { max-width: 62ch; min-height: 4.5em; }
+
+@media (max-width: 780px) {
+  .learn-screen .lesson-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+    gap: .25rem;
+  }
+  .learn-screen .lesson-list button { min-width: 0; min-height: 44px; }
+  .learn-screen .lesson-controls { gap: .4rem; flex-wrap: wrap; }
+  .learn-screen .lesson-controls button { padding-inline: .65rem; min-height: 44px; }
+}
+@media (max-width: 650px) {
+  .learn-turn-grid { grid-template-columns: 1fr; }
+  .learn-inspect, .learn-screen .lesson { padding: .9rem; }
+  .learn-glossary > div { padding: .65rem .7rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .learn-chain-demo .tutorial-link { transition: none; }
+}

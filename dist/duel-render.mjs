@@ -52,10 +52,10 @@ export function renderBoard(state,viewer=0){
   for(const [suffix,player]of [['you',viewer],['opponent',enemy]]){$('lp-'+suffix).textContent=Number(state?.lp?.[player]??8000).toLocaleString();$('lp-bar-'+suffix).style.width=Math.min(100,(state?.lp?.[player]??8000)/80)+'%';}
   chainPlayback.update(state,viewer);
 }
-export function inspectCard(id,{popup=false,instance=null,controller,location,sequence,allowActions=false}={}){
+export function inspectCard(id,{popup=false,instance=null,controller,location,sequence,allowActions=false,updateInspector=true}={}){
   const c=cards.get(+id);if(!c)return;
   const content=`<h2>${escape(c.name)}</h2><div class="card-kind">${escape(typeName(c))}${c.level?' · '+(c.type&0x800000?'Rank':c.type&0x4000000?'Link':'Level')+' '+c.level:''}</div>${c.type&1?`<div class="card-stats"><span>ATK <b>${instance?.attack??c.attack}</b></span><span>${c.type&0x4000000?'LINK':'DEF'} <b>${c.type&0x4000000?c.level:instance?.defense??c.defense}</b></span></div>`:''}<p class="card-effect">${escape(c.text)}</p>${instance?.overlayCards?.length?`<p class="mini-label">Xyz materials: ${instance.overlayCards.map(cardName).map(escape).join(', ')}</p>`:''}${c.cid?`<a class="mini-label" href="https://www.db.yugioh-card.com/yugiohdb/card_search.action?ope=2&amp;cid=${c.cid}&amp;request_locale=ae" target="_blank" rel="noreferrer">Official AE card details</a>`:''}`;
-  $('inspect-art').classList.remove('card-back');$('inspect-art').innerHTML=image(id);$('inspect-details').innerHTML=content;
+  if(updateInspector){$('inspect-art').classList.remove('card-back');$('inspect-art').innerHTML=image(id);$('inspect-details').innerHTML=content;}
   if(popup||innerWidth<=1050){
     const available=allowActions&&currentState?.prompt?.player===currentViewer&&!chainPlayback.busy?describePrompt(currentState.prompt,cardName,effectText).choices.map((choice,index)=>({...choice,index})).filter(choice=>choice.response&&choice.card?.code===+id&&(controller===undefined||choice.card.controller===controller&&choice.card.location===location&&choice.card.sequence===sequence)):[];
     modal(c.name,`<div class="modal-card"><div>${image(id)}</div><div>${content}</div></div>${available.length?`<div class="inspector-actions"><h3>Available actions</h3>${available.map(choice=>`<button class="action-choice" data-choice="${choice.index}"><span><strong>${escape(choice.label)}</strong><small>${escape(choice.detail)}</small></span></button>`).join('')}</div>`:''}`);

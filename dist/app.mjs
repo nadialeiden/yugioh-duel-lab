@@ -83,7 +83,7 @@ function setMode(next){
   if(currentState&&duelMode===next)renderTurnStatus(currentState,viewer);
   $('setup-panel').classList.toggle('hidden',mode!=='practice'||!!session||roomRole==='guest'&&duelMode==='local');
   $('local-panel').classList.toggle('hidden',mode!=='local'||duelMode==='local'&&!!currentState);
-  if(mode==='learn'&&loaded)renderLearn();if(mode==='decks'&&loaded)renderWorkshop();
+  if(mode==='learn'&&loaded)renderLearn({guest:guestAccess});if(mode==='decks'&&loaded)renderWorkshop();
   if(currentState&&['practice','local'].includes(mode)&&duelMode!==mode){
     // A running match continues only on its own table; navigation never silently replaces it.
     $('setup-panel').classList.toggle('hidden',mode!=='practice');$('local-panel').classList.toggle('hidden',mode!=='local');
@@ -283,7 +283,7 @@ document.addEventListener('click',event=>{
   if(b.dataset.previewCard){inspectCard(+b.dataset.previewCard,{popup:true});$('modal-body').insertAdjacentHTML('beforeend','<button id="back-deck-preview" class="subtle full" style="margin-top:16px">Back to deck</button>');return;}
   if(b.id==='back-deck-preview'){previewDeck(previewedDeck);return;}
   if(b.dataset.chainCard){inspectCard(+b.dataset.chainCard,{popup:true});return;}
-  if(b.dataset.mode){setMode(b.dataset.mode);return;}
+  if(b.dataset.mode){if(b.id==='tour-practice')closeModal();setMode(b.dataset.mode);return;}
   if(b.dataset.card!==undefined){
     const id=+b.dataset.card;if(!id){toast('That card is private.');return;}
     const player=+b.dataset.controller,location=+b.dataset.location,index=+b.dataset.sequence;
@@ -305,7 +305,6 @@ document.addEventListener('click',event=>{
     case 'export-review':if(review)download('practice-review.json',JSON.stringify(review.summary(session.state),null,2),'application/json');break;
     case 'export-log':download('duel-log.txt',currentState?.log.map(l=>'Turn '+l.turn+' · '+l.text).join('\n')||'');break;
   }
-  if(b.id==='tour-workshop'){closeModal();setMode('decks');}
   if(b.id==='confirm-selection')confirmSelection();if(b.id==='cancel-selection')cancelSelection();if(b.id==='clear-selection')clearSelection();
 });
 document.addEventListener('input',event=>{if(event.target.dataset.counter!==undefined)changeCounter(+event.target.dataset.counter,event.target.value);});
