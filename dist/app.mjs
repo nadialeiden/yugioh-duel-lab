@@ -344,8 +344,8 @@ $('close-modal').onclick=closeModal;$('modal').addEventListener('click',event=>{
 $('start-practice').onclick=startPractice;$('surrender').onclick=confirmConcede;$('new-duel').onclick=newDuel;
 const difficultyNotes = {
   beginner: 'Simpler openings and fewer interruptions.',
-  standard: 'The original practice opponent for everyday duels.',
-  expert: 'Deck-specific combo priorities, selective interruptions, and attack planning for tournament practice.',
+  standard: 'Plays opening combos, saves interruptions, and plans short attack sequences.',
+  expert: 'Uses tighter sequencing and looks further ahead in battle.',
 };
 $('bot-difficulty').onchange = event => { $('difficulty-note').textContent = difficultyNotes[event.target.value]; };
 $('decision-tab').onclick=()=>showRail('decision');$('log-tab').onclick=()=>showRail('log');$('evaluation-tab').onclick=()=>showRail('evaluation');

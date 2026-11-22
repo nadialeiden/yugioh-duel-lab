@@ -1,6 +1,6 @@
 import {R,describePrompt,selectionResponse,selectionValid} from './choices.mjs';
 import {cardMatchesOpcode} from './vendor/ocg/index.js';
-import {beginnerAction,expertAction,expertChain,expertTarget,planBattle} from './bot-strategy.mjs';
+import {mainAction,chainValue,targetValue,optionValue,planBattle} from './bot-strategy.mjs';
 const priorities = new Map([
   ['Exosister Martha',100],['Exosister Pax',98],['Exosister Elis',90],['Exosister Stella',85],['Sakitama',95],['Aratama',80],
   ['Exosister Kaspitell',95],['Exosister Mikailis',97],['Exosisters Magnifica',110],['Exosister Vadis',80],['Exosister Returnia',95],
@@ -15,7 +15,6 @@ const priorities = new Map([
 export function chooseBot(m,session,cardMap,difficulty='standard') {
   const prompt=describePrompt(m,id=>cardMap.get(id)?.name||String(id));
   const me=m.player, state=session.view(me), enemy=state.players[me^1], own=state.players[me];
-  const enemyMonsters=enemy.monsters.filter(Boolean);
   const card=id=>cardMap.get(id);
   const score=c=>{const data=card(c?.code);return (priorities.get(data?.name)||50)+(data?.attack||0)/200;};
   const best=choices=>choices.reduce((a,b)=>b.score>a.score?b:a);
@@ -31,70 +30,67 @@ export function chooseBot(m,session,cardMap,difficulty='standard') {
       if(r.action===0)value=score(choice.card)+30;
       if(r.action===1)value=score(choice.card)+50;
       if(r.action===5) {
+        if((uses.get(activationKey(choice))||0)>=2)return {choice,score:-100};
         value=score(choice.card)+60;
-        if((uses.get(activationKey(choice))||0)>=2)value=-100;
-        if((c?.type&4)||(c?.type&65536))value=state.turnPlayer===me?-30:value;
-        if(/Reborn|Vishuda|Raigeki|Lightning Storm/.test(c?.name||'')&&!enemyMonsters.length)value=-50;
-        if(/Returnia|Mikailis/.test(c?.name||'')&&choice.card.location===4&&!enemyMonsters.length&&!enemy.grave.length)value=-40;
+        if(c?.type&(4|65536))value=-20;
       }
       if(r.action===4)value=30;
       if(r.action===3)value=0;
       if(r.action===2)value=-25;
       if(r.action===6)value=10;
       if(r.action===7)value=-10;
-      if(beginner)value=beginnerAction(choice,context,value);
-      if(expert && !(r.action===5 && (uses.get(activationKey(choice))||0)>=2))value=expertAction(choice,context,value);
-      return {choice,score:value};
+      return {choice,score:mainAction(choice,context,value,difficulty)};
     });
-    const choice=best(scored).choice;if(choice.response.action===5){const key=activationKey(choice);uses.set(key,(uses.get(key)||0)+1);}return choice.response;
+    const choice=best(scored).choice;
+    if (observations) observations.mainChoice={player:me,code:choice.card?.code,action:choice.response.action};
+    if(choice.response.action===5){const key=activationKey(choice);uses.set(key,(uses.get(key)||0)+1);}
+    return choice.response;
   }
   if(m.type===10) {
-    if(expert) {
-      const plan=planBattle(prompt.choices,context);
-      if(plan.attacker){
-        if(observations)observations.battleChoice={player:me,target:plan.target};
-        return plan.attacker.choice.response;
-      }
-      return prompt.choices.find(c=>c.response.action===2)?.response||prompt.choices.find(c=>c.response.action===3)?.response||prompt.choices[0].response;
+    const plan=planBattle(prompt.choices,context,expert?4:beginner?1:2);
+    if(plan.attacker){
+      if(observations)observations.battleChoice={player:me,target:plan.target};
+      return plan.attacker.choice.response;
     }
-    const attacks=prompt.choices.filter(c=>c.response.action===1).map(choice=>{
-      const atk=own.monsters[choice.card.sequence]?.attack??card(choice.card.code)?.attack??0;
-      const killable=enemyMonsters.filter(c=>!c.code||atk>=(c.position&4?c.defense:c.attack));
-      return {choice,score:choice.card.can_direct?1000+atk:killable.length?atk:-10000};
-    });
-    if(attacks.length&&best(attacks).score>-10000)return best(attacks).choice.response;
     return prompt.choices.find(c=>c.response.action===2)?.response||prompt.choices.find(c=>c.response.action===3)?.response||prompt.choices[0].response;
   }
   if(m.type===16) {
-    if(expert){
-      const candidates=prompt.choices.filter(c=>c.card).map(choice=>({choice,score:expertChain(choice,context)}));
-      const chosen=candidates.length?best(candidates):null;
-      return chosen&&(m.forced||chosen.score>=42)?chosen.choice.response:{type:8,index:null};
-    }
-    if(beginner&&!m.forced&&m.selects.length>0&&state.turnPlayer!==me&&state.chain.at(-1)?.player!==me&&state.chain.length<2){
-      const support=prompt.choices.find(c=>c.card&&!/Ash Blossom|Veiler|Impermanence|Maxx|Called by|Nibiru|Ogre|Crossout|Shifter/.test(card(c.card.code)?.name||''));
-      return support?.response??{type:8,index:null};
-    }
-    const shouldRespond=m.forced||session.lastActivation?.controller!==(me)||state.turnPlayer!==me;
-    if(!shouldRespond)return {type:8,index:null};
-    const candidates=prompt.choices.filter(c=>c.card).map(choice=>({choice,score:score(choice.card)}));
-    return candidates.length?best(candidates).choice.response:{type:8,index:null};
+    const candidates=prompt.choices.filter(choice=>choice.card).map(choice=>{
+      const value=chainValue(choice,context,difficulty);
+      const adjustment=beginner&&/Ash Blossom|Veiler|Impermanence|Maxx|Called by|Nibiru|Ogre|Crossout|Shifter|^Dominus/.test(card(choice.card.code)?.name||'')?40:0;
+      return {choice,score:value-adjustment};
+    });
+    const chosen=candidates.length?best(candidates):null;
+    return chosen&&(m.forced||chosen.score>=(expert?42:48))?chosen.choice.response:{type:8,index:null};
   }
-  if(m.type===13 && expert && Number(m.description)===31 && observations?.battleChoice?.player===me){
+  if(m.type===13 && Number(m.description)===31 && observations?.battleChoice?.player===me){
     return {type:R.YESNO,yes:observations.battleChoice.target===null};
   }
   if(m.type===12||m.type===13)return prompt.choices[0].response;
   if(m.type===26) {
     if(m.can_finish)return {type:7,index:null};
-    if(m.select_cards.length)return {type:7,index:m.select_cards.map((c,index)=>({index,score:-score(c)+(expert?expertTarget(c,context):0)})).sort((a,b)=>b.score-a.score)[0].index};
+    if(m.select_cards.length)return {type:7,index:best(m.select_cards.map((c,index)=>({index,score:-score(c)+targetValue(c,context,difficulty)}))).index};
     return {type:7,index:null};
   }
-  if(m.type===19)return prompt.choices.find(c=>c.response.position===1)?.response||prompt.choices[0].response;
+  if(m.type===19) {
+    const monster=card(m.code);
+    const defend=state.turnPlayer!==me && monster?.defense>monster.attack
+      || monster?.attack===0 && monster.defense>0;
+    return prompt.choices.find(c=>c.response.position===(defend?4:1))?.response || prompt.choices[0].response;
+  }
   if(prompt.counter) {
     let remaining=m.count; const counters=m.cards.map(c=>{const n=Math.min(c.count,remaining);remaining-=n;return n;}); return {type:13,counters};
   }
   if(prompt.multiple) {
-    if(prompt.place)return selectionResponse(m,prompt,Array.from({length:m.count},(_,i)=>i));
+    if(prompt.place) {
+      const center = prompt.choices.findIndex(choice => choice.card.player === me && choice.card.location === 4 && choice.card.sequence === 2);
+      const action = observations?.mainChoice;
+      const centerSummon = action?.player === me && action.action === 0 && card(action.code)?.name === 'Elfnote Regina';
+      const middleSpell = prompt.choices.findIndex(choice => choice.card.player === me && choice.card.location === 8 && choice.card.sequence >= 1 && choice.card.sequence <= 3);
+      const preferred = centerSummon && center >= 0 ? center : middleSpell;
+      const selected = m.type === 18 && m.count === 1 && preferred >= 0 ? [preferred] : Array.from({length:m.count},(_,i)=>i);
+      return selectionResponse(m,prompt,selected);
+    }
     if(prompt.ordered)return selectionResponse(m,prompt,prompt.choices.map((_,i)=>i));
     if(m.type===140||m.type===141)return selectionResponse(m,prompt,Array.from({length:m.count},(_,i)=>i));
     const order=prompt.choices.map((choice,index)=>{
@@ -103,15 +99,15 @@ export function chooseBot(m,session,cardMap,difficulty='standard') {
       if(c.controller===me&&c.location===4)value=-value;
       if(/Chixiao|Longyuan/.test(effectName)&&c.controller===me&&c.location===2)value=-score(c);
       if(/Kaspitell|Pax/.test(effectName)&&c.location===1)value=score(c);
-      if(expert){
-        if(context.hint===501||context.hint===519)value=-score(c);
-        value+=expertTarget(c,context);
-      }
+      if(c.controller===me&&(context.hint===501||context.hint===519))value=-score(c);
+      value+=targetValue(c,context,difficulty);
       return {index,score:value};
     }).sort((a,b)=>b.score-a.score).map(c=>c.index);
     // A bounded subset search handles alternative Synchro/ritual material values.
-    const max=Math.min(m.max||order.length,order.length),min=m.min||0;
+    const max=Math.min(prompt.max,order.length),min=m.type===20?0:prompt.min;
     let found=null,nodes=0;
+    const single = m.type===23 && min <= 1 && max >= 1 ? order.find(index=>selectionValid(m,[index])) : undefined;
+    if (m.type===23 && single!==undefined && !selectionValid(m,[])) return selectionResponse(m,prompt,[single]);
     const visit=(start,picked)=>{
       if(found||++nodes>100000)return;
       if(picked.length>=min&&selectionValid(m,picked)){found=picked.slice();return;}
@@ -126,8 +122,12 @@ export function chooseBot(m,session,cardMap,difficulty='standard') {
   if(prompt.announce){
     const legal=[...cardMap.values()].filter(c=>cardMatchesOpcode({...c,race:BigInt(c.race)},m.opcodes));
     if(!legal.length)throw new Error('No legal card declaration was found.');
+    if(effectName==='Crossout Designator') {
+      const opponent=state.chain.findLast(link=>link.player!==me);
+      if(legal.some(c=>c.code===opponent?.code))return {type:R.ANNOUNCE,card:opponent.code};
+    }
     legal.sort((a,b)=>score(b)-score(a));return {type:18,card:legal[0].code};
   }
-  if(m.type===14)return prompt.choices[0].response;
+  if(m.type===14)return best(prompt.choices.map((choice,index)=>({choice,score:optionValue(m.options[index],context)}))).choice.response;
   return prompt.choices[0]?.response;
 }

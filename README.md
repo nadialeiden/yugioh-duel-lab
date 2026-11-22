@@ -17,7 +17,7 @@ Open **http://localhost:4173**. The terminal also prints your machine's LAN addr
 
 ## Modes
 
-- **Practice:** play against an AI opponent. Choose a preset or a legal saved deck for either side, then pick Beginner, Standard, or Expert. Beginner plays simpler lines with fewer interruptions. Standard uses the original bot. Expert uses card-specific priorities where available, holds disruption for stronger targets, manages resources and plans attacks. Practice Review includes the chosen difficulty in its export.
+- **Practice:** play against an AI opponent. Choose a preset or a legal saved deck for either side, then pick Beginner, Standard, or Expert. Beginner favors simpler openings and fewer interruptions. Standard sequences starters, times disruption, and plans short attack sequences. Expert adds more card-specific sequencing and deeper combat planning. Practice Review includes the difficulty in its export.
 - **Local duel:** two devices, two browsers, one room. On the local Node server, both devices open the **same printed LAN URL**, then one creates a room and the other enters its six-character code. Both decks are validated. The host goes first. Rooms expire when either player disconnects.
 - **Deck workshop:** search the verified AE pool, edit Main/Extra/Side, save multiple decks, import `.ydk`, `ydke://`, or names with quantities, and export `.ydk`. Optional event/source fields retain tournament-list provenance. An imported tournament list still has to pass AE validation.
 - **Learn the interface:** a seven-lesson tour from setup through post-duel review. Read a card, choose and confirm a Monster Zone, hand the turn to your opponent, and step through a Pax / Ash Blossom / Called by the Grave chain. You can replay the examples without starting a duel.
@@ -110,7 +110,7 @@ Practice, deck editing, and Learn run entirely in the browser. Hosted rooms use 
 ## Practical limits
 
 - OCGCore and Project Ignis Lua scripts enforce card effects and legal actions. This fan project is not a Konami-certified simulator or ruling authority.
-- Expert has dedicated strategy coverage for the curated practice presets. Tournament lists and custom decks use the available strategy rules for their cards and generic scoring for the rest. The benchmark measures performance against Standard in seeded, single-duel mirror matches. An unusual decision can still prompt manual assistance.
+- The AI has card priorities for both curated and tournament presets, with general scoring for unfamiliar cards. The benchmark measures strength in seeded single-duel mirrors. An unusual decision can still prompt manual assistance.
 - Evaluations count choices and resources and offer conditional sequencing prompts. They do not grade a move as objectively optimal or calculate a win probability.
 - The phone effect bundle is about 5 MiB and loads when a duel starts. Card illustrations and web fonts use external sources; the duel data and engine are bundled locally.
 - Rooms have one host and one guest. There is no matchmaking, account system, ranked ladder, spectator mode, reconnect recovery, or best-of-three sideboarding flow.

@@ -51,6 +51,15 @@ test('sum materials handle alternate values and mandatory cards',()=>{
   assert.ok(selectionValid(m,[0]));assert.ok(selectionValid(m,[1]));assert.ok(!selectionValid(m,[]));
   const p=describePrompt(m);assert.deepEqual(selectionResponse(m,p,[1]),{type:14,indicies:[0,2]});
 });
+test('open-ended Ritual sums allow sufficient materials and reject redundant overpayment', () => {
+  const message = {type:23,player:0,select_max:1,amount:8,min:0,max:0,selects_must:[],
+    selects:[{code:1,amount:8},{code:2,amount:5},{code:3,amount:4},{code:4,amount:1}]};
+  assert.equal(describePrompt(message).max,4);
+  assert.ok(selectionValid(message,[0]));
+  assert.ok(selectionValid(message,[1,2]));
+  assert.ok(!selectionValid(message,[]));
+  assert.ok(!selectionValid(message,[0,3]));
+});
 test('ordered choices encode the rank of each original card', () => {
   const message = {type:25, player:0, cards:[{code:1},{code:2},{code:3}]};
   const prompt = describePrompt(message);

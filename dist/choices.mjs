@@ -34,8 +34,12 @@ export function describePrompt(m, name = id => String(id), effect = id => String
       p.title = m.forced ? 'Choose a mandatory chain effect' : 'Response window · Build the chain';
       cardOptions(m.selects,R.CHAIN); if (!m.forced) add('Pass response',{type:R.CHAIN,index:null}); break;
     case 15: case 20: case 23: {
-      p.title = m.type === 20 ? 'Choose monsters to Tribute' : m.type === 23 ? 'Choose materials · required total ' + m.amount : 'Choose card(s)';
+      p.title = m.type === 20 ? 'Choose monsters to Tribute' : m.type === 23 ? 'Choose materials · ' + (m.select_max ? 'total at least ' : 'required total ') + m.amount : 'Choose card(s)';
       p.multiple = true; p.min = m.min; p.max = m.max;
+      if (m.type === 23 && m.select_max) {
+        p.min = m.selects_must.length ? 0 : 1;
+        p.max = m.selects.length;
+      }
       p.responseType = m.type === 20 ? R.TRIBUTE : m.type === 23 ? R.SUM : R.CARD;
       (m.selects || []).forEach((c,index) => add(name(c.code),null,c,c.amount ? 'Value ' + (c.amount & 65535) : ''));
       if (m.can_cancel) p.cancel = {type:p.responseType,indicies:null};
@@ -86,14 +90,25 @@ export function selectionValid(m, selected) {
     }
     return selected.length >= (m.min ?? m.count ?? m.cards?.length ?? 1) && selected.length <= (m.max ?? m.count ?? m.cards?.length ?? 1);
   }
-  if (selected.length < m.min || selected.length > m.max) return false;
   const chosen = [...(m.selects_must || []),...selected.map(i=>m.selects[i])];
+  if (m.select_max) {
+    let minimum = 0, maximum = 0, smallest = Infinity;
+    for (const card of chosen) {
+      const primary = card.amount & 65535, alternate = card.amount >>> 16;
+      const low = alternate ? Math.min(primary, alternate) : primary;
+      minimum += low;
+      maximum += Math.max(primary, alternate);
+      smallest = Math.min(smallest, low);
+    }
+    return chosen.length > 0 && maximum >= m.amount && minimum - smallest < m.amount;
+  }
+  if (!chosen.length || selected.length < m.min || selected.length > m.max) return false;
   let sums = new Set([0]);
   for (const c of chosen) {
     const a = c.amount & 65535, b = c.amount >>> 16;
-    sums = new Set([...sums].flatMap(n=> b ? [n+a,n+b] : [n+a]));
+    sums = new Set([...sums].flatMap(n=> b ? [n+a,n+b] : [n+a]).filter(total => total <= m.amount));
   }
-  return m.select_max ? [...sums].some(n=>n>=m.amount) : sums.has(m.amount);
+  return sums.has(m.amount);
 }
 export function selectionResponse(m, prompt, selected, counters = []) {
   if (prompt.counter) return {type:R.COUNTER,counters};
