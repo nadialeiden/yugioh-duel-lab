@@ -21,7 +21,7 @@ flowchart TD
   Validation --> AE[Official AE pool and restrictions]
 ```
 
-There is no database, authentication service, or paid AI API. Decks live in browser local storage. Room data and active duels are ephemeral. The host browser owns the engine in a local match; this is a trusted personal-practice arrangement, not an anti-cheat architecture for public competitive play.
+Decks and display names live in browser local storage. A small endpoint checks the three demo login credentials without a database or external authentication service. Room data and active duels are ephemeral. The host browser owns the engine in a local match, which assumes a trusted personal-practice arrangement.
 
 ## Source layout
 
@@ -122,13 +122,15 @@ The host is trusted and can inspect its own developer tools. For public competit
 
 ## Persistence and imports
 
-The browser uses `ae-duel-lab.decks.v1` in local storage. Imported lists do not become saved until the user chooses Save. `.ydk` export retains all sections. Text imports accept quantities and explicit Main/Extra/Side headings; unknown names are reported. YDKE payloads use little-endian four-byte card passcodes. Tournament event/source fields are supplied by the user and are not automatically authenticated as results.
+The guest deck library uses `ae-duel-lab.decks.v1` in local storage. Signed-in demo profiles use `ae-duel-lab.profile.v1.<login-id>` for both decks and display name. `api/demo-login.js` verifies the fixed credentials on the server, with the same handler used by the local Node server and Vercel. After a successful check, the browser remembers the active ID in session storage. This is a profile switcher for shared demo accounts, with browser-local persistence and no server-side account data. Renaming a profile changes its display name while its stable login ID still identifies the same deck library. Built-in starter lists are available to every profile and can be edited independently.
+
+Imported lists are saved when the user chooses Save. `.ydk` export retains all sections. Text imports accept quantities and explicit Main/Extra/Side headings and report unknown names. YDKE payloads use little-endian four-byte card passcodes. Tournament event/source fields record user-provided references.
 
 Rooms, turn state, evaluations, and tutorial progress are not persisted across page reloads. Review and duel log can be downloaded. The engine retains seed and response history internally for debugging, but there is no replay-import player in this version.
 
 ## Build, deploy, and verification
 
-`npm run build` verifies the prepared snapshot and engine assets, copies transport/license assets, and writes `build-info.json`. Vercel is configured to serve `dist/` statically. It requires no secrets, database, or serverless API for practice. A successful Git push triggers a connected Vercel project, but is not itself proof of a successful deployment.
+`npm run build` verifies the prepared snapshot and engine assets, copies transport/license assets, and writes `build-info.json`. Vercel serves the browser app from `dist/` and deploys `api/demo-login.js` as a function. Practice runs in the browser and the demo endpoint uses the bundled credentials. Verify the deployed commit using its `build-info.json`.
 
 Checks cover actual data-backed AE legality, combined limits, unverified identities, import/export, deterministic shuffle, hidden-state redaction, field-mask decoding, material sum selection, room membership/direction, a complete real-core Exosister-versus-Swordsoul duel, desktop/mobile browser rendering, the tutorial chain, and two-client LAN interaction. Chain regressions exercise a real Pax / AI Ash Blossom / Called by the Grave sequence on 390px and desktop viewports, plus host/guest Pax / Ash interactions on two phone-sized clients. Mobile layout fixtures at 320px, 390px, and 430px verify eight-card hand scrolling, card inspection, and a reachable decision drawer. These are browser/device emulation checks, not physical-phone certification. Browser screenshot artifacts stay outside version control.
 

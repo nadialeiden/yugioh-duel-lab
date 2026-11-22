@@ -24,6 +24,8 @@ Open **http://localhost:4173**. The terminal also prints your machine's LAN addr
 
 The included decks are curated practice lists, **not tournament-winning recipes**. Saved decks stay in the current browser's local storage; export `.ydk` to back them up or move them between devices.
 
+Click **Sign in** and expand **Demo login details** to see the three shared demo credentials. Each account gets its own saved decks. Click your name in the header to change your display name or sign out. Use the original login ID to sign back in. Guest decks stay in their original library, and account data is saved per browser and site address.
+
 During a duel, the table shows each chain link with its card, activating player, and resolution/negation status. Animation pauses AI progression so the response is readable; Skip advances the presentation, and Details reopens the last resolved chain. On a phone, use **Show table / Open decisions** to switch between the board and the fixed bottom decision drawer. Tapping your card opens its text and legal action buttons. Timing help can be expanded when needed.
 
 Card and zone selections remain editable until **Confirm selection**. In a single-choice picker, tap another candidate to replace the pending choice. Tap a selected candidate to deselect it, or use **Clear selection** to start over.
@@ -84,7 +86,7 @@ The refresh refuses incomplete AE pagination or future restriction lists. If new
 
 ## Hosting
 
-`vercel.json` is configured for a static deployment from `dist/`, with `npm run build` as its build command. The repository's Vercel connection can deploy a push to `main`; publishing status is separate from Git push success.
+`vercel.json` serves the app from `dist/` with `npm run build` as its build command. Vercel runs `api/demo-login.js` for the demo password check. The connected GitHub project deploys pushes to `main`.
 
 Practice, deck editing, and Learn run entirely in the browser. Hosted rooms use a PeerJS WebRTC connection with public signaling. That path needs internet access for signaling and a network that permits WebRTC; no TURN relay is configured, so direct connectivity across restrictive networks is not guaranteed. Same-Wi-Fi use is the intended hosted room scenario. The local Node/WebSocket path needs no external signaling and is the primary LAN path.
 

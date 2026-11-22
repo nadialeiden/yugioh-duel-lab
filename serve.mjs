@@ -6,12 +6,14 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {WebSocketServer} from 'ws';
 import {createRoomBroker} from './server-rooms.mjs';
+import login from './api/demo-login.js';
 const root=path.resolve(fileURLToPath(new URL('./dist/',import.meta.url)));
 const mime={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.zip':'application/zip','.wasm':'application/wasm','.svg':'image/svg+xml','.conf':'text/plain; charset=utf-8'};
 const port=Number(process.env.PORT||4173);
 const server=http.createServer(async(req,res)=>{
   try {
     const url=new URL(req.url,'http://localhost');
+    if(url.pathname==='/api/demo-login')return await login(req,res);
     if(url.pathname==='/api/info')return json(res,{lan:true,port});
     if(url.pathname==='/api/ae-card')return json(res,{error:'This card has no verified AE entry in the bundled pool. Refresh the AE data before using it.'},422);
     let filename=path.resolve(root,'.'+decodeURIComponent(url.pathname==='/'?'/index.html':url.pathname));

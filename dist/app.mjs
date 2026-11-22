@@ -8,12 +8,44 @@ import {LocalRoom,revivePacket} from './network.mjs';
 import {configureDuelRenderer,renderBoard,renderTurnStatus,renderDecision,renderLog,renderReview,inspectCard,previewChoice,openPile,handleChoice,confirmSelection,cancelSelection,clearSelection,changeCounter} from './duel-render.mjs';
 import {renderLearn,stopLearn} from './learn.mjs';
 import {chainPlayback} from './chain-ui.mjs';
-const STORE='ae-duel-lab.decks.v1';
+import {activeAccount, readProfile, saveProfileDeck, setActiveAccount} from './profiles.mjs';
+import {showAccount} from './account-ui.mjs';
+let accountId = activeAccount(), starterDecks = [];
 let mode='practice',loaded=false,library=[],editing=null,section='main',resultsLimit=24;
 let session=null,review=null,viewer=0,botPlayer=1,botTimer=null,takeover=false,ended=false,currentState=null,duelMode=null;
 let room=null,roomRole=null,guestDeck=null,roomCode='',pendingBotError=null,starting=false;
 let previewedDeck=null;
-const storage={get(){try{return JSON.parse(localStorage.getItem(STORE)||'[]').filter(d=>d&&typeof d.name==='string'&&SECTIONS.every(s=>Array.isArray(d[s])&&d[s].length<=60&&d[s].every(n=>Number.isInteger(n))));}catch{return[];}},set(){try{localStorage.setItem(STORE,JSON.stringify(library));return true;}catch{toast('This browser could not save your decks. Export .ydk to keep a copy.');return false;}}};
+function loadDeckLibrary() {
+  const saved = readProfile(accountId).decks;
+  library = [...saved, ...starterDecks.filter(deck => !saved.some(entry => entry.id === deck.id)).map(deck => structuredClone(deck))];
+}
+function renderAccountName() {
+  const name = readProfile(accountId).name;
+  const button = $('account-button');
+  button.textContent = accountId ? name : 'Sign in';
+  button.setAttribute('aria-label', accountId ? `Account settings for ${name}` : 'Sign in');
+  $('duelist-label').textContent = accountId ? name : 'DUELIST';
+  $('deck-library-label').textContent = accountId ? `${name}’s decks` : 'Saved decks';
+}
+function canSwitchAccount() {
+  if (starting || roomRole || (currentState && !ended && currentState.winner == null)) {
+    throw new Error('Finish your duel or leave your room before switching accounts.');
+  }
+}
+function switchAccount(nextId) {
+  canSwitchAccount();
+  setActiveAccount(nextId);
+  accountId = nextId;
+  if (currentState || session || room) newDuel();
+  editing = null;
+  section = 'main';
+  previewedDeck = null;
+  for (const control of ['practice-deck', 'bot-deck', 'local-deck']) $(control).value = '';
+  loadDeckLibrary();
+  renderAccountName();
+  refreshSelects();
+  if (mode === 'decks') renderWorkshop();
+}
 function busy(message){$('load-status').classList.remove('hidden');$('load-status').textContent=message;}
 function idle(){$('load-status').classList.add('hidden');}
 function deckById(id){return library.find(d=>d.id===id);}
@@ -21,7 +53,7 @@ function selectedDeck(control){return deckById($(control).value);}
 function issues(deck){return validateDeck(deck,cards,rules,releases);}
 function checkDeck(deck){if(!deck)throw new Error('Select a deck first.');const found=issues(deck);if(found.length)throw new Error(deck.name+': '+found.slice(0,3).join(' '));}
 function refreshSelects(){
-  for(const id of ['practice-deck','bot-deck','local-deck']){const select=$(id),value=select.value;select.innerHTML=library.map(d=>`<option value="${escape(d.id)}">${escape(d.name)}${issues(d).length?' · needs revision':''}</option>`).join('');if(library.some(d=>d.id===value))select.value=value;else select.value=id==='bot-deck'?(library[1]?.id||library[0]?.id):library[0]?.id;}
+  for(const id of ['practice-deck','bot-deck','local-deck']){const select=$(id),value=select.value;select.innerHTML=library.map(d=>`<option value="${escape(d.id)}">${escape(d.name)}${issues(d).length?' · needs revision':''}</option>`).join('');if(library.some(d=>d.id===value))select.value=value;else select.value=id==='bot-deck'?(starterDecks[1]?.id||library[0]?.id):library[0]?.id;}
 }
 function setMode(next){
   mode=next;stopLearn();
@@ -195,7 +227,20 @@ function addToDeck(id){
   if(editing[target].length>=(target==='main'?60:15)){toast(target+' Deck is full.');return;}
   editing[target].push(id);section=target;renderDeckGrid();
 }
-function saveDeck(){editing.name=$('deck-name').value.trim()||'Untitled deck';if(!editing.id)editing.id='deck-'+Date.now().toString(36);const i=library.findIndex(d=>d.id===editing.id);if(i<0)library.push(structuredClone(editing));else library[i]=structuredClone(editing);if(storage.set()){refreshSelects();renderWorkshop();toast('Deck saved in this browser.');}}
+function saveDeck(){
+  editing.name = $('deck-name').value.trim() || 'Untitled deck';
+  if (!editing.id) editing.id = 'deck-' + Date.now().toString(36) + '-' + crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
+  try {
+    saveProfileDeck(accountId, editing);
+  } catch {
+    toast('This browser could not save your deck. Export .ydk to keep a copy.');
+    return;
+  }
+  loadDeckLibrary();
+  refreshSelects();
+  renderWorkshop();
+  toast(accountId ? 'Deck saved to ' + readProfile(accountId).name + '’s library.' : 'Deck saved in this browser.');
+}
 function importDialog(){
   modal('Import a deck',`<p>Upload a .ydk, paste a ydke:// link, or use card names with quantities. Include Main / Extra / Side section headings for text lists.</p><input class="file-input" id="deck-file" type="file" accept=".ydk,.txt"><textarea id="import-text" class="import-area" aria-label="Deck list" placeholder="#main&#10;3 Exosister Martha&#10;3 Exosister Elis&#10;#extra&#10;3 Exosister Mikailis&#10;!side"></textarea><div class="import-meta"><input id="import-title" placeholder="Deck / event name" aria-label="Deck or event name"><input id="import-source" placeholder="Tournament source URL (optional)" aria-label="Tournament source URL"></div><p id="import-status" role="status"></p><div class="modal-actions"><button class="subtle" data-action="close-modal">Cancel</button><button id="confirm-import" class="primary">Import into workshop</button></div>`);
   $('deck-file').onchange=async()=>{const f=$('deck-file').files[0];if(!f)return;if(f.size>100000){toast('Deck file is too large.');return;}$('import-text').value=await f.text();if(!$('import-title').value)$('import-title').value=f.name.replace(/\.[^.]+$/,'');};
@@ -268,9 +313,11 @@ $('more-results').onclick=()=>{resultsLimit+=24;searchCards();};$('format-button
 for(const control of ['practice-deck','bot-deck','local-deck']){const button=document.createElement('button');button.className='text-button deck-preview-button';button.dataset.previewDeck=control;button.textContent='View deck cards';$(control).after(button);}
 renderBoard(null);setMode(['practice','local','decks','learn'].includes(location.hash.slice(1))?location.hash.slice(1):'practice');
 try{
-  const data=await loadCatalog(busy);library=storage.get();if(!library.length)library=structuredClone(data.decks);
-  // Add newly shipped starters without overwriting the user's saved edits.
-  for(const deck of data.decks)if(!library.some(d=>d.id===deck.id))library.push(structuredClone(deck));
+  const data=await loadCatalog(busy);starterDecks=data.decks;
+  loadDeckLibrary();
+  renderAccountName();
+  $('account-button').disabled=false;
+  $('account-button').onclick=()=>showAccount({id:accountId,switchAccount,canSwitch:canSwitchAccount,refreshName:renderAccountName});
   loaded=true;refreshSelects();$('start-practice').disabled=false;$('format-date').textContent=rules.date.slice(5).replace('-',' / ');
   $('data-footer').textContent=data.poolCount.toLocaleString()+' AE identities · verified '+data.poolCheckedAt;
   idle();setMode(mode);
