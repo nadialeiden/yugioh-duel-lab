@@ -80,9 +80,9 @@ The refresh helpers are explicit maintainer commands, not an in-app promise of l
 
 ## AI opponent
 
-The AI uses the same decision interface as a person. It ranks legal summons, effect activations, sets, attacks, and chain responses; selected cards and materials come from the lists returned by the core. It includes card priorities for the six curated presets: Exosister, Swordsoul/Tenyi, Rescue-ACE, Salamangreat, Blue-Eyes, and Labrynth, plus a generic fallback for other saved decks. A bounded subset search considers alternate material values for sum-based prompts. Repeated elective activations are capped by the heuristic to avoid unproductive legal loops.
+The AI ranks legal actions from the duel engine. Standard retains the original policy. Beginner favors simpler summons and passes more early disruption windows. Expert adds deck and board context through `bot-strategy.mjs`, with card priorities for Exosister, Swordsoul/Tenyi, Rescue-ACE, Salamangreat, Blue-Eyes, and Labrynth, plus a generic fallback for saved decks. It uses the bot's own hand, the public board and chain history, and its own selection hints. A bounded attack search compares combat orders, and a separate subset search considers material values for sum-based prompts. Guards cap repeated elective activations.
 
-It is **not** a search tree, neural model, WindBot integration, or tournament-strength opponent. It does not evaluate every future chain or know an optimal combo line. Its legal-action filtering should not be confused with strategic quality. If a complex decision cannot be solved, practice pauses and visibly asks the person to choose for the AI. This assistance mechanism is practice-only.
+`npm run test:ai-benchmark` compares Expert and Standard using the same deck and seed with each policy taking both player positions. The benchmark counts wins and reports duels that reach the test limit separately. The results compare the two policies within the simulator. Human tournament performance and play across side-decked games are outside this benchmark. Practice can pause for help with a decision the bot cannot resolve.
 
 To improve a deck, add an explicit strategy module with tests for opening hands, target choice, interaction timing, and resource conservation. Keep engine validation as the source of legality; do not hard-code a bypass for a preferred combo.
 

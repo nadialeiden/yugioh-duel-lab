@@ -17,7 +17,7 @@ Open **http://localhost:4173**. The terminal also prints your machine's LAN addr
 
 ## Modes
 
-- **Practice:** play against an AI opponent. Choose one of the six included presets or any legal saved deck for either side. Choose turn order and optional helpers. Review measured decisions, response opportunities, resources, and sequencing prompts.
+- **Practice:** play against an AI opponent. Choose one of the six included presets or a legal saved deck for either side, then pick Beginner, Standard, or Expert. Beginner plays simpler lines with fewer interruptions. Standard uses the original bot. Expert uses deck-specific combo priorities, holds disruption for stronger targets, manages resources and plans attacks. Practice Review includes the chosen difficulty in its export.
 - **Local duel:** two devices, two browsers, one room. On the local Node server, both devices open the **same printed LAN URL**, then one creates a room and the other enters its six-character code. Both decks are validated. The host goes first. Rooms expire when either player disconnects.
 - **Deck workshop:** search the verified AE pool, edit Main/Extra/Side, save multiple decks, import `.ydk`, `ydke://`, or names with quantities, and export `.ydk`. Optional event/source fields retain tournament-list provenance. An imported tournament list still has to pass AE validation.
 - **Learn the interface:** a separate six-lesson tour. Try inspecting a card, making a demonstration summon, exploring the phase display, and stepping through a Pax / Ash Blossom / Called by the Grave chain. The tour never changes an active duel or your decks.
@@ -58,6 +58,7 @@ This is a dated snapshot. It does **not** update itself when Konami releases a n
 npm test
 npm run test:engine
 npm run test:ai
+npm run test:ai-benchmark
 ```
 
 With `npm start` running, browser checks are available:
@@ -93,7 +94,7 @@ Practice, deck editing, and Learn run entirely in the browser. Hosted rooms use 
 ## Practical limits
 
 - OCGCore and Project Ignis Lua scripts enforce card effects and legal actions. This fan project is not a Konami-certified simulator or ruling authority.
-- The AI is a **heuristic practice opponent**, not WindBot or an optimal-play solver. It can play multiple decks through engine-provided actions, but its deck-specific planning is limited. Complex/unusual selections may need a manual decision for the AI, explicitly identified in the UI.
+- Expert is tuned for tournament practice with the six included presets. Its benchmark measures performance against Standard in seeded, single-duel mirror matches. Playing strength against human tournament players remains unmeasured. Custom decks use the available strategy rules for their cards and generic scoring for the rest. An unusual decision can still prompt manual assistance.
 - Evaluations count choices and resources and offer conditional sequencing prompts. They do not grade a move as objectively optimal or calculate a win probability.
 - The phone effect bundle is about 5 MiB and loads when a duel starts. Card illustrations and web fonts use external sources; the duel data and engine are bundled locally.
 - Rooms have one host and one guest. There is no matchmaking, account system, ranked ladder, spectator mode, reconnect recovery, or best-of-three sideboarding flow.

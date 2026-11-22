@@ -7,13 +7,14 @@ const read=name=>fs.readFileSync(new URL('../dist/data/'+name,import.meta.url));
 const cards=new Map(JSON.parse(read('catalog.json')).map(c=>[c.code,c]));
 const decks=JSON.parse(read('starters.json')).decks;
 const scripts=new Map(Object.entries(JSON.parse(strFromU8(gunzipSync(read('effects.bin'))))));
+const difficulty=process.env.AI_TEST_DIFFICULTY || 'standard';
 for(const deck of decks){
   const errors=[];const s=new DuelSession({cards,readScript:name=>scripts.get(name)||scripts.get('official/'+name)||null,onError:e=>errors.push(e),seed:[42n,123n,456n,789n]});
   try{
     await s.start([decks[0],deck]);
     for(let i=0;i<1500&&!s.closed&&!errors.length&&s.state.turn<=12;i++){
       const m=s.state.prompt;assert.ok(m,'Engine must offer a decision');
-      const response=chooseBot(m,s,cards);assert.ok(response,'AI must produce a response');
+      const response=chooseBot(m,s,cards,difficulty);assert.ok(response,'AI must produce a response');
       if(process.env.DEBUG_AI)console.log(deck.id,i,'turn',s.state.turn,'P'+m.player,m.type,JSON.stringify(response,(_,v)=>typeof v==='bigint'?String(v):v));
       s.respond(response);
     }

@@ -14,6 +14,8 @@ export class DuelSession {
     this.seed = seed || Array.from(crypto.getRandomValues(new Uint32Array(4)),v=>BigInt(v)+1n);
     this.state = {duelId:Array.from(crypto.getRandomValues(new Uint32Array(2)),n=>n.toString(16)).join('-'),players:[],lp:[8000,8000],turn:0,turnPlayer:0,phase:'Preparing',chain:[],chainEvents:[],chainEventId:0,log:[],prompt:null,promptId:0,winner:null};
     this.history = []; this.closed = false; this.processing = false;
+    this.botObservations = {drawTax:[false,false], hint:null, attack:null};
+    this.selectionHints = new Map();
   }
   async start(decks) {
     this.decks = structuredClone(decks);
@@ -39,23 +41,34 @@ export class DuelSession {
   name(code) { return this.cards.get(code)?.name || 'a card'; }
   log(text) { this.state.log.push({turn:this.state.turn,text}); if(this.state.log.length>250)this.state.log.shift(); }
   consume(m) {
-    if(decisions.has(m.type)){this.state.prompt=m;this.state.promptId++;return;}
+    if(decisions.has(m.type)){
+      this.state.prompt=m;this.state.promptId++;
+      this.botObservations.hint=this.selectionHints.get(m.player) ?? null;
+      this.selectionHints.delete(m.player);
+      return;
+    }
     recordChainEvent(this.state,m);
     switch(m.type) {
       case 1: this.state.prompt=this.pendingPrompt;this.rejected=new Error('The engine rejected this choice. Please choose again.');break;
+      case 2: if(m.hint_type===3)this.selectionHints.set(m.player,Number(m.hint));break;
       case 5: this.closed=true;this.state.winner=m.player; this.state.prompt=null; this.log(m.player<2?'Player '+(m.player+1)+' wins.':'The duel is a draw.'); break;
-      case 40: this.state.turn++; this.state.turnPlayer=m.player; this.log('Turn '+this.state.turn+' · Player '+(m.player+1)); break;
-      case 41: this.state.phase=phases[m.phase]||'Phase '+m.phase; break;
+      case 40: this.botObservations.drawTax=[false,false];this.state.turn++; this.state.turnPlayer=m.player; this.log('Turn '+this.state.turn+' · Player '+(m.player+1)); break;
+      case 41: this.botObservations.attack=null;this.state.phase=phases[m.phase]||'Phase '+m.phase; break;
       case 60: case 62: case 64: this.log((m.type===62?'Special Summon: ':m.type===64?'Flip Summon: ':'Normal Summon: ')+this.name(m.code)); break;
       case 70: this.lastActivation={...m}; this.log('Chain '+m.chain_size+': '+this.name(m.code)); break;
       case 72: this.log('Resolve Chain Link '+m.chain_size); break;
+      case 73: {
+        const link=this.state.chain.find(item=>item.number===m.chain_size);
+        if(link?.status==='resolved'&&this.name(link.code)==='Maxx "C"')this.botObservations.drawTax[link.player]=true;
+        break;
+      }
       case 74: break;
       case 75: case 76: this.log('Chain Link '+m.chain_size+' negated.'); break;
       case 90: this.log('Player '+(m.player+1)+' draws '+m.drawn.length+' card(s).'); break;
       case 91: case 100: this.state.lp[m.player]=Math.max(0,this.state.lp[m.player]-m.amount); this.log('Player '+(m.player+1)+(m.type===100?' pays ':' takes ')+m.amount+' LP.'); break;
       case 92: this.state.lp[m.player]+=m.amount; break;
       case 94: this.state.lp[m.player]=m.lp; break;
-      case 110: this.log('Attack declared.'); break;
+      case 110: this.botObservations.attack=m;this.log('Attack declared.'); break;
       case 130: this.log('Coin: '+m.results.map(v=>v?'Heads':'Tails').join(', ')); break;
       case 131: this.log('Dice: '+m.results.join(', ')); break;
       case 164: this.log(m.hint); break;

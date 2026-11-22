@@ -3,6 +3,7 @@ import {cards,releases,rules,loadCatalog,loadScripts,readScript,cardName,effectT
 import {SECTIONS,emptyDeck,isExtra,parseDeck,exportYdk,validateDeck,safeView} from './model.mjs';
 import {DuelSession} from './engine.mjs';
 import {chooseBot} from './bot.mjs';
+import {difficultyLabels} from './bot-strategy.mjs';
 import {PracticeReview} from './evaluation.mjs';
 import {LocalRoom,revivePacket} from './network.mjs';
 import {configureDuelRenderer,renderBoard,renderTurnStatus,renderDecision,renderLog,renderReview,inspectCard,previewChoice,openPile,handleChoice,confirmSelection,cancelSelection,clearSelection,changeCounter} from './duel-render.mjs';
@@ -98,7 +99,7 @@ function updateSession(state){
     const promptId=state.promptId;
     schedule(()=>{
       if(!session||session.state.promptId!==promptId||ended||takeover)return;
-      try{const response=chooseBot(session.state.prompt,session,cards);if(!response)throw new Error('No eligible response was found.');session.respond(response,promptId,botPlayer);}
+      try{const response=chooseBot(session.state.prompt,session,cards,review.difficulty);if(!response)throw new Error('No eligible response was found.');session.respond(response,promptId,botPlayer);}
       catch(error){pendingBotError=error;takeover=true;present(session.view(viewer));toast('The AI needs help with an unusual decision. Choose for it, then practice continues.');}
     },350);
   }
@@ -123,6 +124,7 @@ configureDuelRenderer({respond,inspect:inspectCard});
 async function startPractice(){
   if(starting)return;
   const own=selectedDeck('practice-deck'),opponent=selectedDeck('bot-deck');
+  const difficulty=$('bot-difficulty').value;
   try{checkDeck(own);checkDeck(opponent);}catch(error){toast(error.message);return;}
   if(currentState&&!ended&&currentState.winner===null){modal('A duel is already in progress','<p>Concede or finish your current duel before starting another.</p>');return;}
   starting=true;$('start-practice').disabled=true;
@@ -130,8 +132,8 @@ async function startPractice(){
     await loadScripts(busy);session?.destroy();room?.close();room=null;roomRole=null;duelMode='practice';ended=false;takeover=false;
     const order=$('turn-order').value;viewer=order==='second'?1:order==='random'?crypto.getRandomValues(new Uint8Array(1))[0]%2:0;botPlayer=viewer^1;
     const decks=viewer===0?[own,opponent]:[opponent,own];
-    review=new PracticeReview(viewer,cards);session=new DuelSession({cards,readScript,onUpdate:updateSession,onError:sessionError});
-    $('your-deck-name').textContent=own.name;$('opponent-name').textContent=opponent.name;$('opponent-role').textContent='AI PRACTICE OPPONENT';$('arena').classList.add('live-duel');
+    review=new PracticeReview(viewer,cards,difficulty);session=new DuelSession({cards,readScript,onUpdate:updateSession,onError:sessionError});
+    $('your-deck-name').textContent=own.name;$('opponent-name').textContent=opponent.name;$('opponent-role').textContent=difficultyLabels[difficulty].toUpperCase()+' AI';$('arena').classList.add('live-duel');
     $('setup-panel').classList.add('hidden');$('local-panel').classList.add('hidden');showRail('decision');
     await session.start(decks);idle();
   }catch(error){session?.destroy();session=null;idle();toast('Could not start the duel: '+error.message);setMode('practice');}
@@ -257,7 +259,7 @@ function previewDeck(deck){
   modal(deck.name,`<p>Read any card before starting your duel. This preview does not change the selected deck.</p>${SECTIONS.map(section=>{const counts=new Map();for(const id of deck[section])counts.set(id,(counts.get(id)||0)+1);return `<h3>${section[0].toUpperCase()+section.slice(1)} Deck · ${deck[section].length}</h3><div class="preview-deck-grid">${[...counts].map(([id,count])=>`<button class="preview-deck-card" data-preview-card="${id}" aria-label="Read ${escape(cardName(id))}">${image(id)}<span>${escape(cardName(id))}<small>×${count}</small></span></button>`).join('')}</div>`;}).join('')}`);
 }
 function showFormat(){
-  modal('Your format and data',`<p><strong>OCG Master Rule (April 2020 revision)</strong>, with OCG trigger handling from the EDOPro core. The application uses the Asian-English card pool and its separate Forbidden & Limited List.</p><ul class="source-list"><li>Restriction list effective <strong>${escape(rules?.date||'Unavailable')}</strong>.</li><li>Pool checked <strong>${escape(rules?.checkedAt||'Unavailable')}</strong>.</li><li><a href="https://www.yugioh-card.com/asia/play/forbidden-and-limited-card-list-ae/" target="_blank" rel="noreferrer">Konami AE Forbidden & Limited List</a></li><li><a href="https://www.db.yugioh-card.com/yugiohdb/?request_locale=ae" target="_blank" rel="noreferrer">Official English (Asia) card database</a></li><li><a href="https://github.com/n1xx1/ocgcore-wasm" target="_blank" rel="noreferrer">ocgcore-wasm 0.1.7 / EDOPro core</a></li></ul><p>The date shown is a verified snapshot. Run the documented refresh command when Konami publishes new releases or restrictions. Card artwork is from the international card database; eligibility is checked against official AE identities.</p><p>The AI is a heuristic practice opponent. It follows engine-provided legal actions, but its strategy is not a competitive solver. Unusual decisions can require assistance. Practice evaluations are measured indicators and coaching prompts.</p>`);
+  modal('Your format and data',`<p><strong>OCG Master Rule (April 2020 revision)</strong>, with OCG trigger handling from the EDOPro core. The application uses the Asian-English card pool and its separate Forbidden & Limited List.</p><ul class="source-list"><li>Restriction list effective <strong>${escape(rules?.date||'Unavailable')}</strong>.</li><li>Pool checked <strong>${escape(rules?.checkedAt||'Unavailable')}</strong>.</li><li><a href="https://www.yugioh-card.com/asia/play/forbidden-and-limited-card-list-ae/" target="_blank" rel="noreferrer">Konami AE Forbidden & Limited List</a></li><li><a href="https://www.db.yugioh-card.com/yugiohdb/?request_locale=ae" target="_blank" rel="noreferrer">Official English (Asia) card database</a></li><li><a href="https://github.com/n1xx1/ocgcore-wasm" target="_blank" rel="noreferrer">ocgcore-wasm 0.1.7 / EDOPro core</a></li></ul><p>The date shown is a verified snapshot. Run the documented refresh command when Konami publishes new releases or restrictions. Card artwork is from the international card database; eligibility is checked against official AE identities.</p><p>Practice offers Beginner, Standard and Expert. Expert uses deck-specific combo priorities and plans attacks against the visible board. Its strongest coverage is on the included decks. Practice Review records the level used.</p>`);
 }
 function keyboardHelp(){modal('Keyboard shortcuts','<div class="kb-list"><p><kbd>1</kbd> Practice · <kbd>2</kbd> Local duel · <kbd>3</kbd> Deck workshop · <kbd>4</kbd> Learn</p><p><kbd>D</kbd> Decision · <kbd>L</kbd> Duel log · <kbd>R</kbd> Practice review</p><p><kbd>Esc</kbd> Close a dialog</p><p>All card actions remain available through the Decision panel. Keyboard shortcuts do not automatically activate cards or pass response windows.</p></div>');}
 document.addEventListener('click',event=>{
@@ -296,6 +298,12 @@ document.addEventListener('input',event=>{if(event.target.dataset.counter!==unde
 document.addEventListener('keydown',event=>{if(event.ctrlKey||event.metaKey||event.altKey||event.target.closest('input,textarea,select')||$('modal').open)return;const key=event.key.toLowerCase();if('1234'.includes(key))setMode(['practice','local','decks','learn'][+key-1]);if(key==='d')showRail('decision');if(key==='l')showRail('log');if(key==='r')showRail('evaluation');});
 $('close-modal').onclick=closeModal;$('modal').addEventListener('click',event=>{if(event.target===$('modal')){const r=$('modal').getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closeModal();}});
 $('start-practice').onclick=startPractice;$('surrender').onclick=confirmConcede;$('new-duel').onclick=newDuel;
+const difficultyNotes = {
+  beginner: 'Simpler openings and fewer interruptions.',
+  standard: 'The original practice opponent for everyday duels.',
+  expert: 'Deck-specific combo priorities, selective interruptions, and attack planning for tournament practice.',
+};
+$('bot-difficulty').onchange = event => { $('difficulty-note').textContent = difficultyNotes[event.target.value]; };
 $('decision-tab').onclick=()=>showRail('decision');$('log-tab').onclick=()=>showRail('log');$('evaluation-tab').onclick=()=>showRail('evaluation');
 $('mobile-panel-toggle').onclick=()=>setRailExpanded(document.querySelector('.right-rail').classList.contains('is-collapsed'));
 window.addEventListener('chain-playback',event=>{

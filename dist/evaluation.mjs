@@ -1,5 +1,5 @@
 export class PracticeReview {
-  constructor(player,cards){this.player=player;this.cards=cards;this.decisions=[];this.started=Date.now();this.startTurn=0;this.notes=[];this.previousKey='';}
+  constructor(player,cards,difficulty='standard'){this.player=player;this.cards=cards;this.difficulty=difficulty;this.decisions=[];this.started=Date.now();this.startTurn=0;this.notes=[];this.previousKey='';}
   record(message,response,state){
     const key=state.promptId;if(key===this.previousKey)return;this.previousKey=key;
     if(message.player!==this.player)return;
@@ -18,7 +18,7 @@ export class PracticeReview {
   summary(state){
     const mine=state.players[this.player];
     const responses=this.decisions.filter(d=>d.responseOffered);
-    return {elapsed:Math.round((Date.now()-this.started)/60000),turns:state.turn,
+    return {difficulty:this.difficulty,elapsed:Math.round((Date.now()-this.started)/60000),turns:state.turn,
       summons:this.decisions.filter(d=>['Normal Summon','Special Summon'].includes(d.action)).length,
       activations:this.decisions.filter(d=>d.action==='Activate effect'||d.action==='Accepted optional effect').length,
       responsesUsed:responses.filter(d=>d.responseUsed).length,responsesOffered:responses.length,
