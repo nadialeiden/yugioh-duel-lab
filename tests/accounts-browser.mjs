@@ -12,6 +12,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(base);
   const account = page.locator('#account-button');
+  await page.locator('#account-button:enabled').waitFor();
   const deckList = page.locator('#saved-decks');
   const accountName = name => page.getByRole('button', {name: `Account settings for ${name}`, exact: true});
 

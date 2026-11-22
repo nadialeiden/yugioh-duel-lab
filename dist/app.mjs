@@ -11,6 +11,7 @@ import {chainPlayback} from './chain-ui.mjs';
 import {activeAccount, readProfile, saveProfileDeck, setActiveAccount} from './profiles.mjs';
 import {showAccount} from './account-ui.mjs';
 let accountId = activeAccount(), starterDecks = [];
+$('deck-screen').inert = true;
 let mode='practice',loaded=false,library=[],editing=null,section='main',resultsLimit=24;
 let session=null,review=null,viewer=0,botPlayer=1,botTimer=null,takeover=false,ended=false,currentState=null,duelMode=null;
 let room=null,roomRole=null,guestDeck=null,roomCode='',pendingBotError=null,starting=false;
@@ -319,6 +320,7 @@ try{
   $('account-button').disabled=false;
   $('account-button').onclick=()=>showAccount({id:accountId,switchAccount,canSwitch:canSwitchAccount,refreshName:renderAccountName});
   loaded=true;refreshSelects();$('start-practice').disabled=false;$('format-date').textContent=rules.date.slice(5).replace('-',' / ');
+  $('deck-screen').inert = false;
   $('data-footer').textContent=data.poolCount.toLocaleString()+' AE identities · verified '+data.poolCheckedAt;
   idle();setMode(mode);
 }catch(error){busy('Could not load the card library. '+error.message+' Start the app with npm start.');console.error(error);}
