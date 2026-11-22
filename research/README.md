@@ -7,6 +7,7 @@ These data files were checked against Konami Neuron's **English (Asia)** locale 
 - `starter-card-evidence.json`: all 55 unique cards from the AE Exosister Tactical-Try and Swordsoul Duel-Ignition products, mapped to simulator passcodes with individual official AE printing codes and release dates. `released: true` requires an AE-numbered printing released on or before the checked date.
 - `starters.json`: two **curated practice lists**, each with 40 Main and 15 Extra cards, built exclusively from the above evidence. These are neither tournament-winning lists nor exact sealed-product deck recipes.
 - `additional-recipes.json`: Rescue-ACE, Salamangreat, Blue-Eyes, and Labrynth practice recipes by exact simulator name and quantity. The bundler maps these to verified AE identities and refuses missing releases, wrong sections, or combined copy-limit violations before including them in the app.
+- `tournament-decks.json`: published tournament lists by simulator passcode, with event, date, placing, pilot, and source link. The bundler checks all three deck sections against the same release pool and AE copy limits. Use the published result and list to verify any new recipe before bundling.
 - `refresh_ae_data.py`: refreshes the official restriction list and card pool, validates locale/pagination/completeness, then rebuilds the curated starters. The script retains an old pool file if the new pool fails its checks. It refuses to publish an incomplete or future restriction list.
 
 ## Refresh

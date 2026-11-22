@@ -95,7 +95,7 @@
   overflow-wrap: anywhere;
 }
 .learn-zones button:not(:disabled) { border-color: var(--accent); color: var(--text); }
-.learn-zones button[aria-pressed="true"], .learn-phases button[aria-pressed="true"] {
+.learn-zones button[aria-pressed="true"], .learn-phases button[aria-pressed="true"], #tour-summon[aria-pressed="true"] {
   border-color: var(--accent);
   background: #2c524b;
   color: #ddfff3;

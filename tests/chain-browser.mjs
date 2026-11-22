@@ -18,6 +18,7 @@ try{
     });
     const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
     await enterLab(page, base);await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);
+    await page.locator('#practice-deck').selectOption('exosister');
     await page.locator('#start-practice').click();await page.locator('#decision-choices .action-choice').first().waitFor();
     if(width<780){
       const toggle=page.locator('#mobile-panel-toggle');
@@ -25,6 +26,7 @@ try{
       await toggle.click();await page.locator(`#own-hand [data-card="${pax}"]`).click();
       await page.locator('#modal .action-choice').filter({hasText:'Activate'}).click();
     }else {await idle(page);await page.locator('#decision-panel .action-choice').filter({hasText:'Exosister Pax'}).filter({hasText:'Activate'}).click();}
+    await page.getByRole('button',{name:'Confirm play',exact:true}).click();
     await choose(page,'Your Spell / Trap Zone 3');await page.locator('#confirm-selection').click();
     await page.locator('.live-chain-card.opponent-link[data-link="2"]').waitFor({timeout:20000});
     assert.ok((await page.locator('#chain-overlay').textContent()).includes('Ash Blossom'));

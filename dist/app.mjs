@@ -25,9 +25,12 @@ let mode='practice',loaded=false,library=[],editing=null,section='main',resultsL
 let session=null,review=null,viewer=0,botPlayer=1,botTimer=null,takeover=false,ended=false,currentState=null,duelMode=null;
 let room=null,roomRole=null,guestDeck=null,roomCode='',pendingBotError=null,starting=false;
 let previewedDeck=null;
+const isTournamentDeck = deck => deck.provenance?.kind === 'tournament-ae';
+
 function loadDeckLibrary() {
   const saved = readProfile(accountId).decks;
-  library = [...saved, ...starterDecks.filter(deck => !saved.some(entry => entry.id === deck.id)).map(deck => structuredClone(deck))];
+  const presets = starterDecks.filter(deck => !saved.some(entry => entry.id === deck.id)).map(deck => structuredClone(deck));
+  library = [...saved, ...presets.filter(isTournamentDeck), ...presets.filter(deck => !isTournamentDeck(deck))];
 }
 function renderAccountName() {
   const name = readProfile(accountId).name;
@@ -65,7 +68,19 @@ function selectedDeck(control){return deckById($(control).value);}
 function issues(deck){return validateDeck(deck,cards,rules,releases);}
 function checkDeck(deck){if(!deck)throw new Error('Select a deck first.');const found=issues(deck);if(found.length)throw new Error(deck.name+': '+found.slice(0,3).join(' '));}
 function refreshSelects(){
-  for(const id of ['practice-deck','bot-deck','local-deck']){const select=$(id),value=select.value;select.innerHTML=library.map(d=>`<option value="${escape(d.id)}">${escape(d.name)}${issues(d).length?' · needs revision':''}</option>`).join('');if(library.some(d=>d.id===value))select.value=value;else select.value=id==='bot-deck'?(starterDecks[1]?.id||library[0]?.id):library[0]?.id;}
+  const groups = [
+    ['Tournament decks', library.filter(isTournamentDeck)],
+    ['Practice presets and saved decks', library.filter(deck => !isTournamentDeck(deck))],
+  ];
+  const options = groups.filter(([, decks]) => decks.length).map(([label, decks]) =>
+    `<optgroup label="${label}">${decks.map(deck => `<option value="${escape(deck.id)}">${escape(deck.name)}${issues(deck).length ? ' · needs revision' : ''}</option>`).join('')}</optgroup>`).join('');
+  for (const id of ['practice-deck', 'bot-deck', 'local-deck']) {
+    const select = $(id);
+    const value = select.value;
+    select.innerHTML = options;
+    const defaultDeck = id === 'bot-deck' ? deckById('swordsoul') : library[0];
+    select.value = deckById(value)?.id ?? defaultDeck?.id ?? library[0]?.id ?? '';
+  }
 }
 function setMode(next){
   if (guestAccess && !['practice','learn'].includes(next)) {
@@ -218,7 +233,9 @@ function renderDeckGrid(){
   document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('active',b.dataset.section===section));
   const found=issues(editing);$('deck-legality').classList.toggle('valid',!found.length);$('deck-legality').textContent=found.length?'Needs revision · '+found.length+' validation '+(found.length===1?'issue':'issues'):'AE legal · '+rules.date+' list · AE pool verified '+rules.checkedAt;
   $('legality-issues').innerHTML=found.length?found.map(i=>'<li>'+escape(i)+'</li>').join(''):'<li>Deck sizes, section placement, released AE card pool, and combined copy limits pass.</li>';
-  $('deck-provenance').textContent=editing.provenance?.event?'Imported list · '+editing.provenance.event:editing.provenance?.description||'Your custom practice deck.';
+  const tournament = tournamentSource(editing);
+  if (tournament) $('deck-provenance').innerHTML = tournament;
+  else $('deck-provenance').textContent=editing.provenance?.event?'Imported list · '+editing.provenance.event:editing.provenance?.description||'Your custom practice deck.';
   const counts=new Map();for(const id of editing[section])counts.set(id,(counts.get(id)||0)+1);
   $('deck-grid').innerHTML=counts.size?[...counts].map(([id,n])=>`<div class="deck-card"><button data-inspect="${id}" aria-label="Inspect ${escape(cardName(id))}">${image(id)}<span class="quantity">×${n}</span></button><button class="remove-copy" data-remove="${id}" aria-label="Remove one ${escape(cardName(id))}">−</button></div>`).join(''):'<div class="empty-grid">This section is empty.<br>Find a card in the AE library and use + to add it.</div>';
 }
@@ -246,6 +263,10 @@ function addToDeck(id){
 }
 function saveDeck(){
   editing.name = $('deck-name').value.trim() || 'Untitled deck';
+  if (isTournamentDeck(editing)) {
+    editing.id = null;
+    editing.provenance = {...editing.provenance, kind: 'tournament-custom'};
+  }
   if (!editing.id) editing.id = 'deck-' + Date.now().toString(36) + '-' + crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
   try {
     saveProfileDeck(accountId, editing);
@@ -268,12 +289,22 @@ function importDialog(){
     }catch(error){$('import-status').textContent=error.message;}
   };
 }
+function tournamentSource(deck) {
+  const source = deck.provenance;
+  if (!source || !(isTournamentDeck(deck) || source.kind === 'tournament-custom')) return '';
+  const label = source.kind === 'tournament-custom' ? 'Custom copy of' : 'Tournament list';
+  const result = [label, source.placement, source.event, source.date, source.pilot].filter(Boolean).map(escape).join(' · ');
+  const link = typeof source.source === 'string' && source.source.startsWith('https://')
+    ? ` · <a href="${escape(source.source)}" target="_blank" rel="noreferrer">View published list</a>` : '';
+  return result + link + (source.note ? '<br>' + escape(source.note) : '');
+}
 function previewDeck(deck){
   if(!deck)return;previewedDeck=deck;
-  modal(deck.name,`<p>Read any card before starting your duel. This preview does not change the selected deck.</p>${SECTIONS.map(section=>{const counts=new Map();for(const id of deck[section])counts.set(id,(counts.get(id)||0)+1);return `<h3>${section[0].toUpperCase()+section.slice(1)} Deck · ${deck[section].length}</h3><div class="preview-deck-grid">${[...counts].map(([id,count])=>`<button class="preview-deck-card" data-preview-card="${id}" aria-label="Read ${escape(cardName(id))}">${image(id)}<span>${escape(cardName(id))}<small>×${count}</small></span></button>`).join('')}</div>`;}).join('')}`);
+  const tournament = tournamentSource(deck);
+  modal(deck.name,`${tournament ? `<p class="muted">${tournament}</p>` : ''}<p>Read any card before starting your duel. This preview does not change the selected deck.</p>${SECTIONS.map(section=>{const counts=new Map();for(const id of deck[section])counts.set(id,(counts.get(id)||0)+1);return `<h3>${section[0].toUpperCase()+section.slice(1)} Deck · ${deck[section].length}</h3><div class="preview-deck-grid">${[...counts].map(([id,count])=>`<button class="preview-deck-card" data-preview-card="${id}" aria-label="Read ${escape(cardName(id))}">${image(id)}<span>${escape(cardName(id))}<small>×${count}</small></span></button>`).join('')}</div>`;}).join('')}`);
 }
 function showFormat(){
-  modal('Your format and data',`<p><strong>OCG Master Rule (April 2020 revision)</strong>, with OCG trigger handling from the EDOPro core. The application uses the Asian-English card pool and its separate Forbidden & Limited List.</p><ul class="source-list"><li>Restriction list effective <strong>${escape(rules?.date||'Unavailable')}</strong>.</li><li>Pool checked <strong>${escape(rules?.checkedAt||'Unavailable')}</strong>.</li><li><a href="https://www.yugioh-card.com/asia/play/forbidden-and-limited-card-list-ae/" target="_blank" rel="noreferrer">Konami AE Forbidden & Limited List</a></li><li><a href="https://www.db.yugioh-card.com/yugiohdb/?request_locale=ae" target="_blank" rel="noreferrer">Official English (Asia) card database</a></li><li><a href="https://github.com/n1xx1/ocgcore-wasm" target="_blank" rel="noreferrer">ocgcore-wasm 0.1.7 / EDOPro core</a></li></ul><p>The date shown is a verified snapshot. Run the documented refresh command when Konami publishes new releases or restrictions. Card artwork is from the international card database; eligibility is checked against official AE identities.</p><p>Practice offers Beginner, Standard and Expert. Expert uses deck-specific combo priorities and plans attacks against the visible board. Its strongest coverage is on the included decks. Practice Review records the level used.</p>`);
+  modal('Your format and data',`<p><strong>OCG Master Rule (April 2020 revision)</strong>, with OCG trigger handling from the EDOPro core. The application uses the Asian-English card pool and its separate Forbidden & Limited List.</p><ul class="source-list"><li>Restriction list effective <strong>${escape(rules?.date||'Unavailable')}</strong>.</li><li>Pool checked <strong>${escape(rules?.checkedAt||'Unavailable')}</strong>.</li><li><a href="https://www.yugioh-card.com/asia/play/forbidden-and-limited-card-list-ae/" target="_blank" rel="noreferrer">Konami AE Forbidden & Limited List</a></li><li><a href="https://www.db.yugioh-card.com/yugiohdb/?request_locale=ae" target="_blank" rel="noreferrer">Official English (Asia) card database</a></li><li><a href="https://github.com/n1xx1/ocgcore-wasm" target="_blank" rel="noreferrer">ocgcore-wasm 0.1.7 / EDOPro core</a></li></ul><p>The date shown is a verified snapshot. Run the documented refresh command when Konami publishes new releases or restrictions. Card artwork is from the international card database; eligibility is checked against official AE identities.</p><p>Practice offers Beginner, Standard and Expert. Expert uses card-specific priorities where available and plans attacks against the visible board. Practice Review records the level used.</p>`);
 }
 function keyboardHelp(){modal('Keyboard shortcuts','<div class="kb-list"><p><kbd>1</kbd> Practice · <kbd>2</kbd> Local duel · <kbd>3</kbd> Deck workshop · <kbd>4</kbd> Learn</p><p><kbd>D</kbd> Decision · <kbd>L</kbd> Duel log · <kbd>R</kbd> Practice review</p><p><kbd>Esc</kbd> Close a dialog</p><p>All card actions remain available through the Decision panel. Keyboard shortcuts do not automatically activate cards or pass response windows.</p></div>');}
 document.addEventListener('click',event=>{

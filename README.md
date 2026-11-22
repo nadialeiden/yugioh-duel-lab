@@ -17,12 +17,12 @@ Open **http://localhost:4173**. The terminal also prints your machine's LAN addr
 
 ## Modes
 
-- **Practice:** play against an AI opponent. Choose one of the six included presets or a legal saved deck for either side, then pick Beginner, Standard, or Expert. Beginner plays simpler lines with fewer interruptions. Standard uses the original bot. Expert uses deck-specific combo priorities, holds disruption for stronger targets, manages resources and plans attacks. Practice Review includes the chosen difficulty in its export.
+- **Practice:** play against an AI opponent. Choose a preset or a legal saved deck for either side, then pick Beginner, Standard, or Expert. Beginner plays simpler lines with fewer interruptions. Standard uses the original bot. Expert uses card-specific priorities where available, holds disruption for stronger targets, manages resources and plans attacks. Practice Review includes the chosen difficulty in its export.
 - **Local duel:** two devices, two browsers, one room. On the local Node server, both devices open the **same printed LAN URL**, then one creates a room and the other enters its six-character code. Both decks are validated. The host goes first. Rooms expire when either player disconnects.
 - **Deck workshop:** search the verified AE pool, edit Main/Extra/Side, save multiple decks, import `.ydk`, `ydke://`, or names with quantities, and export `.ydk`. Optional event/source fields retain tournament-list provenance. An imported tournament list still has to pass AE validation.
 - **Learn the interface:** a seven-lesson tour from setup through post-duel review. Read a card, choose and confirm a Monster Zone, hand the turn to your opponent, and step through a Pax / Ash Blossom / Called by the Grave chain. You can replay the examples without starting a duel.
 
-The included decks are curated practice lists, **not tournament-winning recipes**. Saved decks stay in the current browser's local storage; export `.ydk` to back them up or move them between devices.
+The deck picker includes curated practice presets and a **Tournament decks** group. On a fresh profile, your deck defaults to the Mogi Cup Exosister build. You can inspect the event, placement, and source from **View deck cards**. The workshop saves a personal copy when you edit and save a tournament list. Saved decks stay in the current browser's local storage.
 
 Enter through the sign-in screen using one of the three shared demo accounts. Each account gets its own saved decks. Click your name in the header to change your display name or sign out. Use the original login ID to sign back in. Account data is saved per browser and site address.
 
@@ -30,7 +30,7 @@ Enter through the sign-in screen using one of the three shared demo accounts. Ea
 
 During a duel, the table shows each chain link with its card, activating player, and resolution/negation status. Animation pauses AI progression so the response is readable; Skip advances the presentation, and Details reopens the last resolved chain. On a phone, use **Show table / Open decisions** to switch between the board and the fixed bottom decision drawer. Tapping your card opens its text and legal action buttons. Timing help can be expanded when needed.
 
-Card and zone selections remain editable until **Confirm selection**. In a single-choice picker, tap another candidate to replace the pending choice. Tap a selected candidate to deselect it, or use **Clear selection** to start over.
+Main Phase card actions stay pending until **Confirm play**. Card, zone, and material prompts use **Confirm selection**. In a single-choice picker, tap another candidate to replace the pending choice. Tap a selected candidate to deselect it, or use **Clear selection** to start over.
 
 The heading, turn marker, and mobile drawer identify **Your turn / Opponent’s turn** from your perspective, including response windows during the other player's turn. Use **Read card** next to a candidate or chain response to inspect its full text without changing the pending choice or activating it. Pre-duel deck selectors also have **View deck cards** previews, with a Back to deck button after inspecting a card.
 
@@ -42,6 +42,18 @@ The heading, turn marker, and mobile drawer identify **Your turn / Opponent’s 
 | Salamangreat | FIRE Link summons and graveyard recursion |
 | Blue-Eyes | Dragon Synchro/Fusion pressure and recovery |
 | Labrynth | Normal Trap control and resource management |
+
+### Tournament presets
+
+| Deck | Result |
+| --- | --- |
+| Exosister | Daikon, Top 4, Mogi Cup #25 (3v3, 27 September 2026). [Published list](https://ygo.iwantcard.tw/decks/30954) |
+| RoLaD – Mitsurugi Light and Darkness Ritual | Melvin Sundoro, winner, Indonesia City Duel Bali AE (17 October 2026). [Published list](https://ygoprodeck.com/deck/mitsurugi-light-and-darkness-ritual-740214) |
+| Branded Elfnote | Samuel Lorent, Top 4, Indonesia City Duel Bali AE (17 October 2026). [Published list](https://ygoprodeck.com/deck/branded-elfnote-740218) |
+| Power Patron | Dimas Adhi Pratama, Top 4, Indonesia City Duel Bali AE (17 October 2026). [Published list](https://ygoprodeck.com/deck/power-patron-740217) |
+| Branded Dracotail | GARAITO92, winner, Kuma Kuma Kadoya Ranking (4 October 2026). [Published list](https://ygoprodeck.com/deck/branded-dracotail-740212) |
+
+Each list retains its Main, Extra, and Side Deck. All five pass the current AE checks. The Exosister list comes from a Japanese OCG team event and passes AE checks with the same cards and quantities.
 
 ## Format snapshot
 
@@ -98,7 +110,7 @@ Practice, deck editing, and Learn run entirely in the browser. Hosted rooms use 
 ## Practical limits
 
 - OCGCore and Project Ignis Lua scripts enforce card effects and legal actions. This fan project is not a Konami-certified simulator or ruling authority.
-- Expert is tuned for tournament practice with the six included presets. Its benchmark measures performance against Standard in seeded, single-duel mirror matches. Playing strength against human tournament players remains unmeasured. Custom decks use the available strategy rules for their cards and generic scoring for the rest. An unusual decision can still prompt manual assistance.
+- Expert has dedicated strategy coverage for the curated practice presets. Tournament lists and custom decks use the available strategy rules for their cards and generic scoring for the rest. The benchmark measures performance against Standard in seeded, single-duel mirror matches. An unusual decision can still prompt manual assistance.
 - Evaluations count choices and resources and offer conditional sequencing prompts. They do not grade a move as objectively optimal or calculate a win probability.
 - The phone effect bundle is about 5 MiB and loads when a duel starts. Card illustrations and web fonts use external sources; the duel data and engine are bundled locally.
 - Rooms have one host and one guest. There is no matchmaking, account system, ranked ladder, spectator mode, reconnect recovery, or best-of-three sideboarding flow.

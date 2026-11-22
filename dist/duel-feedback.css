@@ -17,6 +17,7 @@
 }
 .decision-option { display:flex;gap:7px;align-items:stretch;margin-bottom:8px; }
 .decision-option .action-choice { flex:1;min-width:0;margin-bottom:0; }
+.selection-footer .selection-count { flex-basis:100%;margin:0; }
 .read-choice { flex-shrink:0;width:74px;min-height:44px;background:#263b42;border:1px solid #57727d;color:#ccebe5;padding:8px;font-size:.8rem; }
 .read-choice:hover { background:#34545b; }
 .deck-preview-button { display:block;min-height:36px;margin:4px 0 0;text-align:left; }

@@ -60,6 +60,8 @@ The app does not implement Exosister effects by hand. The compiled OCGCore engin
 
 The supplied Main Deck order is explicitly shuffled using a deterministic seeded Fisher–Yates shuffle before insertion. `startDuel` is not assumed to shuffle the opening decks. The four-word random seed is created from browser cryptographic random values. Reusing a seed recreates an opening order for debugging. Later in-duel shuffles are handled by the core.
 
+The Decision panel holds a selected Main Phase card action locally until **Confirm play**. The renderer then sends the original engine action. Any follow-up zone, target, or material selection belongs to the next prompt. Effect labels resolve Project Ignis string IDs with the 20-bit slot format. The pinned WASM binding also has a compatibility correction for card ordering. The client sends the chosen rank per original candidate and the binding serializes those ranks as raw bytes.
+
 Each processing batch runs until the core ends or requests a decision. Message types are converted to UI choices by `choices.mjs`. Responses go back through `duelSetResponse`; prompt IDs reject stale network responses. All displayed play buttons originate from core decisions. A rejected decision is returned to the same prompt rather than treated as a successful play.
 
 The public query decoder in pinned `ocgcore-wasm@0.1.7` does not safely skip the `TYPE` query payload. `engine.mjs` deliberately excludes that query flag and reads display type from the card catalog. Requested runtime values include passcode, position, ATK/DEF, level/rank, materials, counters, and public status. Revisit this compatibility choice when updating the wrapper.
@@ -76,11 +78,13 @@ YGOPRODeck metadata supplies passcode-to-Konami-ID mappings where available; dir
 
 Multiple alternate-art passcodes can map to one AE identity, so the number of mapped simulator entries can exceed the identity count. Copy restrictions prefer Konami ID to prevent different English names from bypassing limits. `validateDeck` combines Main, Extra, and Side and checks sizes, sections, OCG status, AE availability, and restricted quantities. The host validates the guest deck independently before a local duel.
 
+Published tournament presets live in `research/tournament-decks.json`. The bundler validates the published passcodes and quantities, then carries the event details into the deck preview and workshop. Saving a modified tournament preset creates a personal copy so the published recipe stays available.
+
 The refresh helpers are explicit maintainer commands, not an in-app promise of live updates. Their output retains source URLs and checked/effective dates. Cards appearing in a future release must not be admitted ahead of their release. Curated starters are checked against their individually documented official printings.
 
 ## AI opponent
 
-The AI ranks legal actions from the duel engine. Standard retains the original policy. Beginner favors simpler summons and passes more early disruption windows. Expert adds deck and board context through `bot-strategy.mjs`, with card priorities for Exosister, Swordsoul/Tenyi, Rescue-ACE, Salamangreat, Blue-Eyes, and Labrynth, plus a generic fallback for saved decks. It uses the bot's own hand, the public board and chain history, and its own selection hints. A bounded attack search compares combat orders, and a separate subset search considers material values for sum-based prompts. Guards cap repeated elective activations.
+The AI ranks legal actions from the duel engine. Standard retains the original policy. Beginner favors simpler summons and passes more early disruption windows. Expert adds deck and board context through `bot-strategy.mjs`, with card priorities for Exosister, Swordsoul/Tenyi, Rescue-ACE, Salamangreat, Blue-Eyes, and Labrynth, plus generic scoring for unfamiliar cards in any deck. It uses the bot's own hand, the public board and chain history, and its own selection hints. A bounded attack search compares combat orders, and a separate subset search considers material values for sum-based prompts. Guards cap repeated elective activations.
 
 `npm run test:ai-benchmark` compares Expert and Standard using the same deck and seed with each policy taking both player positions. The benchmark counts wins and reports duels that reach the test limit separately. The results compare the two policies within the simulator. Human tournament performance and play across side-decked games are outside this benchmark. Practice can pause for help with a decision the bot cannot resolve.
 

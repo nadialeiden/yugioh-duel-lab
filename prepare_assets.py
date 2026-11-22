@@ -82,9 +82,22 @@ def main():
     target.mkdir(parents=True, exist_ok=True)
     for source in engine.glob('*.js'):
         shutil.copy2(source, target / source.name)
+    fix_core_sort_response(target / 'index.js')
     shutil.copy2(ROOT / 'node_modules/fflate/esm/browser.js', OUT / 'vendor/fflate.mjs')
     (DATA / 'asset-info.json').write_text(json.dumps({'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'engine': 'ocgcore-wasm 0.1.7', 'cards': len(cards), 'sources': ['https://github.com/ProjectIgnis/BabelCDB', 'https://github.com/ProjectIgnis/CardScripts']}), encoding='utf-8')
     print('Browser engine and scripts ready.', flush=True)
+
+
+def fix_core_sort_response(index):
+    # ocgcore-wasm 0.1.7 prefixes SORT_CARD with a count. OCGCore expects
+    # the permutation immediately, with -1 reserved for a canceled sort.
+    old = b't.i8(e.order.length);for(let r of e.order)t.i8(r)'
+    new = b'for(let r of e.order)t.i8(r)'
+    code = index.read_bytes()
+    if code.count(old) != 1:
+        raise ValueError('Recheck the SORT_CARD serializer for this OCGCore version')
+    index.write_bytes(code.replace(old, new))
+
 
 def bundle_effects(archive=None):
     archive = archive or (DATA / 'scripts.zip').read_bytes()

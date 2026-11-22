@@ -76,19 +76,27 @@ function firstTurn(content) {
           <span class="tiny-label">DECISION</span>
           <h3 id="tour-prompt">Choose your play</h3>
           <div id="tour-actions" class="learn-actions">
-            <button id="tour-summon" class="primary">Normal Summon Stella</button>
+            <button id="tour-summon" class="subtle" aria-pressed="false">Normal Summon Stella</button>
             <button id="tour-read" class="subtle">Read card</button>
+            <button id="tour-confirm-play" class="primary" disabled>Confirm play</button>
           </div>
         </div>
       </div>
       <p id="tour-status" class="tour-status" role="status">Read Stella’s effect, then choose Normal Summon Stella in Decision.</p>
     </div>
-    <p class="lesson-tip">The game may ask you to choose a zone, target, position, or materials. You can change a selection before pressing <strong>Confirm selection</strong>. Some decisions then open a response window.</p>`;
+    <p class="lesson-tip">In a duel, you can switch Main Phase card actions before pressing <strong>Confirm play</strong>. The game may then ask for a zone, target, position, or materials. You can change those selections before pressing <strong>Confirm selection</strong>.</p>`;
   const zones = [...content.querySelectorAll('[data-tour-zone]')];
   const status = $('tour-status');
   const actions = $('tour-actions');
   $('tour-hand').onclick = $('tour-read').onclick = () => openPreview(name);
-  $('tour-summon').onclick = () => {
+  $('tour-summon').onclick = event => {
+    const button = event.currentTarget;
+    const selected = button.getAttribute('aria-pressed') !== 'true';
+    button.setAttribute('aria-pressed', String(selected));
+    $('tour-confirm-play').disabled = !selected;
+    status.textContent = selected ? 'Normal Summon Stella selected. Press Confirm play to continue.' : 'Select Normal Summon Stella when you’re ready.';
+  };
+  $('tour-confirm-play').onclick = () => {
     $('tour-prompt').textContent = 'Choose a zone';
     zones.forEach(button => { button.disabled = false; });
     actions.innerHTML = '<button id="tour-confirm" class="primary" disabled>Confirm selection</button>';

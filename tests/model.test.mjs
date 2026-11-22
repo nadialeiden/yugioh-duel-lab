@@ -51,3 +51,13 @@ test('sum materials handle alternate values and mandatory cards',()=>{
   assert.ok(selectionValid(m,[0]));assert.ok(selectionValid(m,[1]));assert.ok(!selectionValid(m,[]));
   const p=describePrompt(m);assert.deepEqual(selectionResponse(m,p,[1]),{type:14,indicies:[0,2]});
 });
+test('ordered choices encode the rank of each original card', () => {
+  const message = {type:25, player:0, cards:[{code:1},{code:2},{code:3}]};
+  const prompt = describePrompt(message);
+  assert.deepEqual(selectionResponse(message, prompt, [2,0,1]), {type:15, order:[1,2,0]});
+});
+test('number declarations display the value and send its option index', () => {
+  const prompt = describePrompt({type:143, player:0, options:[3n,6n]});
+  assert.equal(prompt.choices[0].label, '3');
+  assert.deepEqual(prompt.choices[0].response, {type:19, value:0});
+});

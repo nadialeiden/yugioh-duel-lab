@@ -9,9 +9,11 @@ try{
   const host=await hostContext.newPage(),guest=await guestContext.newPage(),errors=[];
   const idle=page=>page.waitForFunction(()=>!document.body.classList.contains('chain-playing'));
   for(const page of [host,guest]){page.on('pageerror',e=>errors.push(e.message));await enterLab(page, undefined, page === host ? 'duelist1' : 'duelist2');await page.waitForFunction(()=>document.querySelector('#start-practice')&&!document.querySelector('#start-practice').disabled);await page.locator('[data-mode="local"]').click();}
+  await host.locator('#local-deck').selectOption('exosister');
   await host.locator('#create-room').click();await host.locator('.room-code-display').waitFor();
   await guest.locator('#local-deck').selectOption('swordsoul');await guest.locator('#room-code').fill(await host.locator('.room-code-display').textContent());await guest.locator('#join-room').click();await host.locator('#local-start').waitFor({state:'visible'});await host.locator('#local-start').click();
   await host.locator('#decision-panel .action-choice').filter({hasText:'Exosister Pax'}).filter({hasText:'Activate'}).click();
+  await host.getByRole('button',{name:'Confirm play',exact:true}).click();
   await host.locator('#decision-panel .action-choice').filter({hasText:'Your Spell / Trap Zone 3'}).click();await host.locator('#confirm-selection').click();
   await guest.locator('#decision-panel .action-choice').filter({hasText:'Ash Blossom'}).waitFor();await idle(guest);await guest.locator('#decision-panel .action-choice').filter({hasText:'Ash Blossom'}).click();
   await host.locator('.live-chain-card.opponent-link[data-link="2"]').waitFor();await guest.locator('.live-chain-card.your-link[data-link="2"]').waitFor();await idle(host);

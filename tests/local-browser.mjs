@@ -28,7 +28,7 @@ try{
   await guest.locator('.action-choice').first().waitFor({timeout:10000});console.log('Guest decision:',(await guest.locator('#decision-panel').textContent()).slice(0,180));
   const summon=guest.locator('.action-choice').filter({hasText:'Normal Summon'}).first();
   if(await summon.count()){
-    await summon.click();await guest.locator('.action-choice').filter({hasText:'Your Monster Zone 3'}).click();await guest.locator('#confirm-selection').click();
+    await summon.click();await guest.getByRole('button',{name:'Confirm play',exact:true}).click();await guest.locator('.action-choice').filter({hasText:'Your Monster Zone 3'}).click();await guest.locator('#confirm-selection').click();
     await guest.waitForTimeout(300);console.log('Guest summon sent.');
   }
   assert.deepEqual(errors,[]);console.log('Two-browser LAN test passed; private opening hand is redacted on the wire.');

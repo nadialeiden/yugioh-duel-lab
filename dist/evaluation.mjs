@@ -33,7 +33,7 @@ export function coachHint(m,phase,name){
   if(m.type===23||m.type===26)return 'Select materials, then finish when the engine permits it. The engine checks levels, ranks, Link arrows, and summoning restrictions.';
   if(m.type===18)return 'Choose an available zone. Fusion, Synchro, and Xyz monsters can use Main Monster Zones. Links and face-up Pendulums from the Extra Deck need the appropriate zone.';
   if(m.type===10)return 'Choose a monster to attack with. The engine asks for a target next and opens legal response windows before calculating battle damage.';
-  if(m.type===11&&phase==='Main 1')return 'Highlighted cards have legal actions. Select a card to inspect its text; make your play in the Decision panel. You can enter the Battle Phase when the engine allows it.';
+  if(m.type===11&&phase==='Main 1')return 'Highlighted cards have legal actions. In Decision, pick a card action and use Confirm play when you are ready. You can enter the Battle Phase when the engine offers it.';
   if(m.type===20)return 'Tributing uses the listed monsters. The highlighted selection must satisfy the required Tribute count.';
   return 'Read the current decision, select a legal option, and confirm. Card costs and effect timing are enforced by the duel engine.';
 }

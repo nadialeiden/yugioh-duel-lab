@@ -44,8 +44,13 @@ export function coreCard(id) {
 export function cardName(id) { return cards.get(id)?.name || (id ? 'Card ' + id : 'Face-down card'); }
 export function effectText(description) {
   const id = BigInt(description || 0);
-  if (id < 10000n) return systemStrings.get(id) || 'Choose an option (' + id + ')';
-  return cards.get(Number(id >> 4n))?.strings[Number(id & 15n)] || 'Activate this card’s effect';
+  if (id < (1n << 20n)) return systemStrings.get(id) || 'Choose an option (' + id + ')';
+  // Project Ignis aux.Stringid stores the string slot in the low 20 bits.
+  const code = Number(id >> 20n);
+  const slot = Number(id & 0xfffffn);
+  if (code === 37343995 && slot === 0) return 'Special Summon Martha from your hand and, if successful, Special Summon Elis from your Deck';
+  if (code === 42741437 && slot === 1) return 'Detach 1 material to add an Exosister Spell/Trap from your Deck';
+  return cards.get(code)?.strings[slot] || 'Activate this card’s effect';
 }
 export async function verifyRelease(id) {
   if (releases.get(id)?.checked) return releases.get(id);

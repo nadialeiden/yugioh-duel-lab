@@ -7,6 +7,25 @@ import shutil
 from collections import Counter
 ROOT = pathlib.Path(__file__).resolve().parent
 DATA = ROOT / 'dist/data'
+
+
+def check_preset(deck, cards, rules):
+    if not 40 <= len(deck['main']) <= 60 or len(deck['extra']) > 15 or len(deck['side']) > 15:
+        raise ValueError('Invalid deck sizes: ' + deck['name'])
+    quantities = Counter()
+    for section in ('main', 'extra', 'side'):
+        for code in deck[section]:
+            card = cards.get(code)
+            if not card or not card['ae'] or not card['ot'] & 1 or card['type'] & 0x4000:
+                raise ValueError(f"{deck['name']}: no playable AE card for {code}")
+            extra_type = bool(card['type'] & (0x40 | 0x2000 | 0x800000 | 0x4000000))
+            if (section == 'extra' and not extra_type) or (section == 'main' and extra_type):
+                raise ValueError(f"{deck['name']}: wrong deck section for {card['name']}")
+            quantities[card['cid']] += 1
+            if quantities[card['cid']] > rules['konami_id_limits'].get(str(card['cid']), 3):
+                raise ValueError(f"{deck['name']}: AE copy limit exceeded for {card['name']}")
+
+
 def main():
     research = ROOT / 'research'
     pool = json.loads((research / 'ae-pool.json').read_text(encoding='utf-8-sig'))
@@ -38,22 +57,21 @@ def main():
                 style=recipe.get('style', ''), description=recipe.get('description', ''),
                 checkedAt=pool['checkedAt'], rulesDate=rules['date'],
                 provenance={'kind': 'curated-practice', 'description': recipe.get('description', 'Curated AE practice deck; not a tournament result.'), 'source': pool['source']})
-            quantities = Counter()
             for section in ['main', 'extra', 'side']:
                 for name, count in recipe.get(section, {}).items():
                     if name not in lookup:
                         raise ValueError('No verified AE mapping for ' + name)
-                    card = lookup[name]
-                    extra_type = bool(card['type'] & (0x40 | 0x2000 | 0x800000 | 0x4000000))
-                    if (section == 'extra' and not extra_type) or (section == 'main' and extra_type):
-                        raise ValueError('Wrong deck section: ' + name)
-                    quantities[card['cid']] += count
-                    if quantities[card['cid']] > rules['konami_id_limits'].get(str(card['cid']), 3):
-                        raise ValueError('AE copy limit exceeded: ' + name)
-                    deck[section].extend([card['code']] * count)
-            if len(deck['main']) != 40 or len(deck['extra']) > 15 or len(deck['side']) > 15:
-                raise ValueError('Invalid practice deck sizes: ' + deck['name'])
+                    deck[section].extend([lookup[name]['code']] * count)
             starters.append(deck)
+    tournament_decks = json.loads((research / 'tournament-decks.json').read_text(encoding='utf-8-sig'))
+    for deck in tournament_decks:
+        deck.update(checkedAt=pool['checkedAt'], rulesDate=rules['date'])
+    starters.extend(tournament_decks)
+    catalog_by_code = {card['code']: card for card in catalog}
+    if len({deck['id'] for deck in starters}) != len(starters):
+        raise ValueError('Duplicate deck preset ID')
+    for deck in starters:
+        check_preset(deck, catalog_by_code, rules)
     payload = {'decks': starters, 'releases': releases, 'poolCheckedAt': pool['checkedAt'], 'poolCount': pool['count'], 'matchedCount': sum(c['ae'] for c in catalog)}
     for filename, value in [('ae-rules.json', rules), ('starters.json', payload), ('catalog.json', catalog)]:
         (DATA / filename).write_text(json.dumps(value, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
@@ -61,6 +79,6 @@ def main():
     for file in (ROOT / 'dist').rglob('*'):
         if file.is_file() and file.suffix in ('.json', '.js', '.mjs', '.css', '.html', '.conf') and file.stat().st_size > 1024:
             file.with_name(file.name + '.gz').write_bytes(gzip.compress(file.read_bytes(), mtime=0))
-    print('AE catalog:', payload['matchedCount'], 'mapped passcodes from', pool['count'], 'official identities; list', rules['date'], '; practice decks:', len(starters))
+    print('AE catalog:', payload['matchedCount'], 'mapped passcodes from', pool['count'], 'official identities; list', rules['date'], '; deck presets:', len(starters))
 if __name__ == '__main__':
     main()

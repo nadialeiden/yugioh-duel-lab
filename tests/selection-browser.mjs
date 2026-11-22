@@ -40,8 +40,36 @@ try{
     assert.equal(await page.locator('#decision-choices .selected').count(),0);
     await page.locator('#decision-choices [data-choice="2"]').click();await second.click();await page.locator('#confirm-selection').click();
     assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[{type:5,indicies:[2,1]}]);
+    await page.evaluate(()=>{
+      window.selectionResponses=[];
+      const [martha,elis]=[37343995,16474916].map((code,sequence)=>({code,sequence,controller:0,location:2,position:8}));
+      window.showSelectionPrompt({type:11,player:0,summons:[martha,elis],activates:[{...martha,description:37343995n<<20n}],to_ep:true});
+    });
+    const confirmPlay=page.getByRole('button',{name:'Confirm play',exact:true});
+    await first.click();await second.click();
+    assert.equal(await first.getAttribute('aria-pressed'),'false');
+    assert.match(await page.locator('#selection-count').textContent(),/Normal Summon.*Exosister Elis/);
+    assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[]);
+    await page.locator('#clear-selection').click();
+    assert.equal(await confirmPlay.isDisabled(),true);
+    await page.locator('#decision-choices [data-choice="2"]').click();
+    assert.match(await page.locator('#selection-count').textContent(),/Special Summon Elis from your Deck/);
+    await confirmPlay.click();
+    assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[{type:1,action:5,index:0}]);
+    await page.evaluate(()=>{
+      window.selectionResponses=[];
+      const mikailis={code:42741437,controller:0,location:4,sequence:0,position:1};
+      const description=BigInt(mikailis.code)<<20n;
+      window.showSelectionPrompt({type:11,player:0,activates:[{...mikailis,description},{...mikailis,description:description|1n}]});
+    });
+    assert.match(await first.textContent(),/Banish.*GY/);
+    assert.match(await second.textContent(),/Detach 1 material.*Spell\/Trap/);
+    await first.click();await second.click();
+    assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[]);
+    await confirmPlay.click();
+    assert.deepEqual(await page.evaluate(()=>window.selectionResponses),[{type:1,action:5,index:1}]);
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
-    console.log(width+'px: swap Mikailis to Kaspitell, deselect, clear/reselect, and change zones before Confirm.');
+    console.log(width+'px: swap cards and zones, clear pending plays, and select the intended Martha and Mikailis effects.');
     await page.close();
   }
   assert.deepEqual(errors,[]);

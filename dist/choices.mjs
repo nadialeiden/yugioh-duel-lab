@@ -10,7 +10,11 @@ export function describePrompt(m, name = id => String(id), effect = id => String
     case 11: {
       p.title = 'Main Phase · Choose your play';
       const groups = [['summons','Normal Summon',0],['special_summons','Special Summon',1],['pos_changes','Change position',2],['monster_sets','Set monster',3],['spell_sets','Set Spell / Trap',4],['activates','Activate',5]];
-      for (const [key,label,action] of groups) (m[key] || []).forEach((c,index) => add(label, {type:R.IDLE,action,index}, c, c.description ? effect(c.description) : name(c.code)));
+      for (const [key,label,action] of groups) (m[key] || []).forEach((c,index) => {
+        const marthaHandEffect = key === 'activates' && c.location === 2 && name(c.code) === 'Exosister Martha';
+        const detail = c.description ? effect(c.description) : name(c.code);
+        add(marthaHandEffect ? 'Activate · Special Summon' : label, {type:R.IDLE,action,index}, c, detail);
+      });
       if (m.to_bp) add('Enter Battle Phase',{type:R.IDLE,action:6,index:null});
       if (m.to_ep) add('End turn',{type:R.IDLE,action:7,index:null}); break;
     }
@@ -52,7 +56,7 @@ export function describePrompt(m, name = id => String(id), effect = id => String
       p.title = 'Choose battle position';
       [[1,'Face-up Attack'],[4,'Face-up Defense'],[8,'Face-down Defense'],[2,'Face-down Attack']].forEach(([position,label]) => { if (m.positions & position) add(label,{type:R.POSITION,position}); }); break;
     case 21: case 25:
-      p.title = 'Select cards in resolution order'; p.multiple = true; p.ordered = true; p.min = p.max = m.cards.length; p.responseType = R.SORT;
+      p.title = m.type === 21 ? 'Order the chain effects' : 'Order the cards'; p.multiple = true; p.ordered = true; p.min = p.max = m.cards.length; p.responseType = R.SORT;
       m.cards.forEach(c => add(name(c.code),null,c)); break;
     case 22:
       p.title = 'Remove ' + m.count + ' counters'; p.counter = true; p.min = p.max = m.count;
@@ -65,7 +69,9 @@ export function describePrompt(m, name = id => String(id), effect = id => String
     }
     case 142: p.title = 'Declare a card'; p.announce = true; break;
     case 143:
-      p.title = 'Declare a number'; m.options.forEach(value => add(String(value),{type:R.NUMBER,value:Number(value)})); break;
+      p.title = 'Declare a number';
+      m.options.forEach((value, index) => add(String(value), {type:R.NUMBER,value:index}));
+      break;
     case 132:
       p.title = 'Rock, Paper, Scissors'; [[1,'Scissors'],[2,'Rock'],[3,'Paper']].forEach(([value,label])=>add(label,{type:R.RPS,value})); break;
     default: throw new Error('Unsupported decision from core: ' + m.type);
@@ -92,7 +98,12 @@ export function selectionValid(m, selected) {
 export function selectionResponse(m, prompt, selected, counters = []) {
   if (prompt.counter) return {type:R.COUNTER,counters};
   if (prompt.place) return {type:prompt.responseType,places:selected.map(i=>prompt.choices[i].card)};
-  if (prompt.ordered) return {type:R.SORT,order:selected};
+  if (prompt.ordered) {
+    // Each entry is the chosen rank of that card in the original candidate list.
+    const order = Array(selected.length);
+    selected.forEach((index, rank) => { order[index] = rank; });
+    return {type:R.SORT,order};
+  }
   if (m.type === 140) return {type:R.RACE,races:selected.map(i=>prompt.choices[i].card.value)};
   if (m.type === 141) return {type:R.ATTRIB,attributes:selected.map(i=>prompt.choices[i].card.value)};
   // Mandatory SUM material indices precede the selectable cards in ocgcore.

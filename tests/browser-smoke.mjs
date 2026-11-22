@@ -11,11 +11,29 @@ const page=await context.newPage();const errors=[];
 page.on('pageerror',e=>{errors.push(e.message);console.error('PAGE ERROR:',e.message);});
 page.on('console',m=>{if(m.type()==='error'&&!m.text().includes('net::'))console.error('CONSOLE:',m.text());});
 await enterLab(page);await page.waitForFunction(()=>!document.querySelector('#start-practice').disabled,{timeout:30000});
-if(await page.locator('#bot-deck option').count()!==6)throw new Error('All six AI presets must be available.');
+assert.equal(await page.locator('#practice-deck').inputValue(),'exosister-competitive');
+for(const selector of ['#practice-deck','#bot-deck','#local-deck']){
+  const presets=page.locator(`${selector} optgroup[label="Tournament decks"] option`);
+  assert.deepEqual(await presets.evaluateAll(options=>options.map(option=>option.value)),
+    ['exosister-competitive','rolad-mitsurugi','branded-elfnote','power-patron','branded-dracotail']);
+}
+await page.locator('#bot-deck').selectOption('rolad-mitsurugi');
+await page.locator('[data-preview-deck="bot-deck"]').click();
+assert.match(await page.locator('#modal-body').textContent(),/Winner.*Indonesia City Duel Bali AE.*Melvin Sundoro/);
+assert.equal(await page.locator('#modal-body').getByRole('heading',{name:'Main Deck · 46'}).count(),1);
+assert.equal(await page.locator('#modal-body').getByRole('heading',{name:'Side Deck · 15'}).count(),1);
+assert.match(await page.getByRole('link',{name:'View published list'}).getAttribute('href'),/740214$/);
+await page.locator('#close-modal').click();
 await page.screenshot({path:fileURLToPath(new URL('practice-setup.png',out)),fullPage:true});
 await page.getByRole('button',{name:'Deck workshop',exact:true}).click();await page.locator('#card-search').fill('Exosister');
 await page.waitForTimeout(300);console.log('Workshop:',await page.locator('#deck-legality').textContent(),await page.locator('#search-count').textContent());
 await page.screenshot({path:fileURLToPath(new URL('deck-workshop.png',out)),fullPage:true});
+await page.locator('[data-edit-deck="rolad-mitsurugi"]').click();
+assert.match(await page.locator('#deck-provenance').textContent(),/Melvin Sundoro/);
+await page.locator('#deck-name').fill('My RoLaD practice copy');
+await page.locator('#save-deck').click();
+assert.equal(await page.locator('[data-edit-deck="rolad-mitsurugi"]').count(),1);
+assert.match(await page.locator('#deck-provenance').textContent(),/Custom copy of/);
 await page.getByRole('button',{name:'Learn the interface',exact:true}).click();await page.locator('[data-lesson="4"]').click();
 for(let i=0;i<2;i++)await page.locator('#chain-next').click();
 assert.equal(await page.locator('#chain-stage').textContent(),'Your response window');
@@ -32,7 +50,7 @@ await page.getByRole('button',{name:'Practice',exact:true}).click();await page.l
 await page.waitForFunction(()=>document.querySelector('#setup-panel').classList.contains('hidden'),{timeout:30000});await page.waitForTimeout(3000);
 console.log('Duel:',await page.locator('#decision-panel').textContent());
 await page.screenshot({path:fileURLToPath(new URL('practice-live.png',out)),fullPage:true});
-const button=page.locator('.action-choice').filter({hasText:'Normal Summon'}).first();if(await button.count()){await button.click();await page.waitForTimeout(1000);console.log('After summon:',(await page.locator('#decision-panel').textContent()).slice(0,600));}
+const button=page.locator('.action-choice').filter({hasText:'Normal Summon'}).first();if(await button.count()){await button.click();await page.getByRole('button',{name:'Confirm play',exact:true}).click();await page.waitForTimeout(1000);console.log('After summon:',(await page.locator('#decision-panel').textContent()).slice(0,600));}
 await page.locator('#evaluation-tab').click();console.log('Review:',(await page.locator('#evaluation-panel').textContent()).slice(0,350));
 const mobile=await browser.newContext({viewport:{width:390,height:844},isMobile:true});const mobilePage=await mobile.newPage();mobilePage.on('pageerror',e=>errors.push(e.message));await enterLab(mobilePage);await mobilePage.waitForFunction(()=>!document.querySelector('#start-practice').disabled);await mobilePage.screenshot({path:fileURLToPath(new URL('mobile.png',out)),fullPage:true});
 console.log('Mobile horizontal overflow:',await mobilePage.evaluate(()=>document.documentElement.scrollWidth>innerWidth));
@@ -44,6 +62,7 @@ await mobilePage.locator('#modal-body').getByRole('heading',{name:'Exosister Mar
 await mobilePage.locator('#close-modal').click();
 await mobilePage.locator('#lesson-next').click();
 await mobilePage.locator('#tour-summon').click();
+await mobilePage.locator('#tour-confirm-play').click();
 const zone = index => mobilePage.locator(`[data-tour-zone="${index}"]`);
 await zone(0).click();
 await zone(3).click();
